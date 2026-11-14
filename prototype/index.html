@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حصن · نموذج الاتجاه أ</title>
+<meta name="theme-color" content="#022C33">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<!--
+  THROWAWAY PROTOTYPE — Direction A «لبنة». Not app code.
+  Scope: hero (+ signature 2: battlement band), event card variants, register-button states, calendar.
+  Rules followed: brand-kit tokens, logical properties only, motion = transform/opacity only,
+  Arabic-Indic digits via Intl (ar-SA-u-ca-gregory-nu-arab), times in Asia/Riyadh.
+  All sample content is draft and carries «مؤقت».
+-->
+<style>
+:root{
+  /* core palette — brand kit 04-web/tokens/tokens.css */
+  --deep:#022C33; --mid:#04424C; --teal:#03606D; --green:#0E8B6B; --mint:#5FD4AA;
+  --box:#EDF4F2; --page:#F7FAF9; --white:#FFFFFF;
+  /* scale steps used here */
+  --deep-100:#DCE1E2; --deep-200:#B3C0C2; --deep-400:#416166;
+  --teal-50:#F0F5F6; --teal-100:#DCE9EB; --teal-400:#428892; --teal-700:#024650;
+  --green-100:#DDEFEA; --green-700:#0A644F;
+  --mint-200:#CFF2E6;
+  /* additions not in the guide (flagged in discovery G-7) */
+  --danger:#B42318; --danger-bg:#FCEEEC; --warning:#8A5A00; --warning-bg:#FBF3E1;
+
+  --font:'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --font-en:'IBM Plex Sans', system-ui, sans-serif;
+
+  /* type scale G p.16, mobile floors = assumption */
+  --fs-display:clamp(2.5rem, 1.9rem + 2.4vw, 3.5rem);
+  --fs-h1:clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem);
+  --fs-h2:clamp(1.375rem, 1.2rem + .7vw, 1.75rem);
+  --fs-h3:clamp(1.125rem, 1.08rem + .2vw, 1.25rem);
+  --fs-figure:clamp(3rem, 2.2rem + 3.2vw, 4.5rem);
+
+  /* motion */
+  --ease:cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-exit:cubic-bezier(0.4, 0, 1, 1);
+  --dur-fast:120ms; --dur-base:200ms; --dur-lay:220ms; --dur-merlon:180ms;
+  --origin-start:100% 50%;   /* RTL: inline-start is the right edge */
+  --sq:16px;                 /* battlement square */
+}
+@media (min-width:768px){ :root{ --sq:24px; } }
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ color-scheme:light; -webkit-text-size-adjust:100%; }
+body{ margin:0; background:var(--page); color:var(--deep); font-family:var(--font); font-size:1rem; line-height:1.7; }
+svg{ display:block; }
+a{ color:var(--teal); text-underline-offset:.3em; }
+button{ font:inherit; }
+.vh{ position:absolute !important; inline-size:1px; block-size:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+:focus-visible{ outline:3px solid var(--teal); outline-offset:2px; }
+.on-dark :focus-visible{ outline-color:var(--mint); }
+.container{ inline-size:min(1200px, 100% - 40px); margin-inline:auto; }
+@media (min-width:640px){ .container{ inline-size:min(1200px, 100% - 64px); } }
+.tmp{ font-size:.68em; font-weight:500; opacity:.7; margin-inline-start:.35em; white-space:nowrap; }
+html.clean .tmp{ display:none; }
+.ic{ inline-size:18px; block-size:18px; flex:none; }
+[dir="rtl"] .mirror{ transform:scaleX(-1); }
+
+/* ---------- prototype toolbar (not product UI) ---------- */
+.proto-bar{ font:400 13px/1.4 var(--font-en); background:var(--box); color:var(--deep); border-block-end:1px solid var(--deep-100); }
+.proto-bar .container{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; padding-block:8px; }
+.proto-bar strong{ font-weight:600; }
+.proto-bar .sp{ margin-inline-start:auto; }
+.proto-bar button{ font:600 12px/1 var(--font-en); letter-spacing:.04em; padding:10px 12px; background:#fff; color:var(--teal); border:1px solid var(--teal-400); cursor:pointer; }
+.proto-bar button[aria-pressed="true"]{ background:var(--teal); color:#fff; }
+.proto-note{ font:600 12px/1.4 var(--font-en); letter-spacing:.08em; text-transform:uppercase; color:var(--deep-400); margin:0; }
+.skip{ position:absolute; inset-inline-start:16px; inset-block-start:-100px; background:#fff; color:var(--deep); padding:12px 16px; z-index:10; }
+.skip:focus{ inset-block-start:16px; }
+
+/* ---------- hairline (G: every page) ---------- */
+.hairline{ block-size:4px; background:linear-gradient(to left, var(--mint), var(--teal)); }
+
+/* ---------- brand plate ---------- */
+.plate{
+  position:relative; color:#fff; overflow:hidden;
+  background:
+    radial-gradient(60% 70% at 25% 18%, rgb(95 212 170 / .22), transparent 60%),
+    linear-gradient(120deg, #03606D 0%, #04424C 50%, #022C33 100%);
+}
+.site-header{ position:relative; z-index:2; display:flex; align-items:center; gap:16px; padding-block:16px; }
+.logo{ flex:none; display:block; block-size:48px; color:#fff; text-decoration:none; }
+.logo svg{ block-size:100%; inline-size:auto; }
+@media (min-width:1024px){ .logo{ block-size:52px; } }
+.nav{ display:none; }
+@media (min-width:1024px){ .nav{ display:flex; align-items:center; gap:4px; margin-inline-start:24px; } }
+.nav a, .nav > div > button{ display:inline-flex; align-items:center; gap:6px; min-block-size:44px; padding:8px 12px; color:var(--teal-100); font:500 1rem/1.4 var(--font); text-decoration:none; background:none; border:0; cursor:pointer; }
+.nav a:hover, .nav > div > button:hover{ color:#fff; }
+.nav a[aria-current="page"]{ color:#fff; text-decoration:underline; text-decoration-color:var(--mint); text-decoration-thickness:2px; text-underline-offset:12px; }
+.nav .dd{ position:relative; }
+.dd-panel{ position:absolute; inset-block-start:100%; inset-inline-start:0; min-inline-size:240px; background:#fff; border:1px solid var(--deep-100); box-shadow:0 12px 32px rgb(2 44 51 / .18); padding:8px 0; margin:0; list-style:none; }
+.dd-panel[hidden]{ display:none; }
+.dd-panel a{ display:flex; color:var(--deep); padding:10px 16px; min-block-size:44px; font-weight:500; }
+.dd-panel a:hover{ background:var(--box); color:var(--deep); }
+.dd button[aria-expanded="true"] .ic{ transform:rotate(180deg); }
+.header-end{ margin-inline-start:auto; display:flex; align-items:center; gap:8px; }
+.icon-btn{ inline-size:44px; block-size:44px; display:inline-grid; place-items:center; background:none; border:1px solid rgb(220 233 235 / .35); color:#fff; cursor:pointer; }
+@media (min-width:1024px){ .icon-btn.menu{ display:none; } }
+.mnav{ position:relative; z-index:2; border-block-start:1px solid rgb(220 233 235 / .16); }
+.mnav[hidden]{ display:none; }
+.mnav ul{ list-style:none; margin:0; padding:8px 0 16px; }
+.mnav a{ display:flex; align-items:center; min-block-size:48px; color:var(--teal-100); text-decoration:none; font-weight:500; border-block-end:1px solid rgb(220 233 235 / .12); }
+.mnav a:hover{ color:#fff; }
+
+/* hero */
+.hero{ position:relative; z-index:1; display:grid; grid-template-columns:minmax(0, 1fr); gap:32px; padding-block:28px calc(var(--sq) + 64px); }
+@media (min-width:1024px){
+  .hero{ grid-template-columns:repeat(12, minmax(0,1fr)); gap:24px; align-items:end; padding-block:64px calc(var(--sq) + 96px); }
+  .hero-main{ grid-column:1 / span 7; }
+  .next-brick{ grid-column:9 / span 4; }
+}
+.kicker{ display:flex; align-items:center; gap:12px; margin:0 0 20px; font:600 .8125rem/1.4 var(--font); color:var(--teal-100); }
+.marks{ display:inline-flex; gap:4px; flex:none; }
+.marks i{ inline-size:8px; block-size:8px; background:var(--mint); }
+.marks i:nth-child(2){ opacity:.6; } .marks i:nth-child(3){ opacity:.3; }
+.display{ margin:0; font-size:var(--fs-display); line-height:1.25; font-weight:700; color:#fff; text-wrap:balance; max-inline-size:11.5em; }
+.display .accent{ color:var(--mint); }
+.lede{ margin:20px 0 0; max-inline-size:34rem; color:var(--teal-100); }
+.ctas{ display:flex; flex-direction:column; gap:12px; margin-block-start:28px; }
+@media (min-width:640px){ .ctas{ flex-direction:row; flex-wrap:wrap; } }
+
+/* buttons — colour changes are instant; only transform animates */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; min-block-size:48px; padding:12px 24px; font:600 1rem/1.4 var(--font); border:1.5px solid transparent; border-radius:0; cursor:pointer; text-decoration:none; white-space:nowrap; transition:transform 80ms linear; }
+.header-end .btn{ padding-inline:14px; }
+.auth .ic{ display:none; }
+@media (max-width:359px){   /* WCAG 1.4.10 reflow at 320 px: sign-in stays visible as an icon button with its full name */
+  .auth{ inline-size:44px; padding:0; }
+  .auth .ic{ display:block; }
+  .auth .lbl{ position:absolute; inline-size:1px; block-size:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+}
+.hero-main{ min-inline-size:0; }
+.ctas .btn, .btn-block{ white-space:normal; }
+.btn:active{ transform:translateY(1px); }
+.btn-primary{ background:var(--teal); color:#fff; }
+.btn-primary:hover{ background:var(--teal-700); }
+.btn-secondary{ background:transparent; color:var(--teal); border-color:var(--teal); }
+.btn-secondary:hover{ background:var(--teal-100); }
+.btn-ghost{ background:none; color:var(--teal); min-block-size:44px; padding:8px; text-decoration:underline; text-decoration-thickness:1px; }
+.btn-ghost:hover{ color:var(--teal-700); }
+.btn-danger{ background:var(--danger); color:#fff; }
+.btn-block{ inline-size:100%; }
+.btn-sm{ min-block-size:44px; padding:8px 16px; font-size:.9375rem; }
+.btn[disabled]{ cursor:progress; opacity:.8; }
+.on-dark .btn-primary{ background:var(--page); color:var(--deep); }
+.on-dark .btn-primary:hover{ background:var(--mint); }
+.on-dark .btn-secondary{ color:#fff; border-color:rgb(220 233 235 / .7); }
+.on-dark .btn-secondary:hover{ background:rgb(255 255 255 / .08); }
+.spin{ animation:spin 800ms linear infinite; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+/* next-event brick */
+.next-brick{ background:var(--mid); border-block-start:2px solid var(--mint); padding:24px; }
+.nb-label{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 12px; font:600 .8125rem/1.4 var(--font); color:var(--mint-200); }
+.nb-date{ display:flex; align-items:flex-end; gap:16px; }
+.figure{ font-size:var(--fs-figure); line-height:1.1; font-weight:700; font-variant-numeric:tabular-nums; }
+.nb-date .figure{ color:#fff; }
+.nb-date p{ margin:0 0 6px; line-height:1.4; }
+.nb-month{ font-size:var(--fs-h3); font-weight:600; display:block; }
+.nb-when{ font-size:.875rem; color:var(--teal-100); }
+.nb-title{ margin:16px 0 6px; font-size:var(--fs-h3); line-height:1.5; font-weight:600; color:#fff; }
+.nb-dept{ margin:0; font:600 .8125rem/1.4 var(--font); color:var(--mint-200); }
+.nb-seats{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin:16px 0 4px; font-size:.875rem; color:var(--teal-100); }
+.nb-link{ display:inline-flex; align-items:center; gap:8px; min-block-size:44px; color:#fff; font-weight:600; text-decoration:none; }
+.nb-link:hover{ text-decoration:underline; }
+
+/* signature 2 — battlement band: page-coloured squares rise from the plate's lower edge */
+.band{ position:absolute; z-index:1; inset-inline:0; inset-block-end:0; block-size:var(--sq); display:flex; gap:var(--sq); overflow:hidden; padding-inline-start:calc(var(--sq) / 2); }
+.band span{ flex:none; inline-size:var(--sq); block-size:var(--sq); background:var(--page); transform-origin:50% 100%; animation:rise var(--dur-merlon) var(--ease) both; animation-delay:calc(200ms + var(--i) * var(--stagger, 30ms)); }
+@keyframes rise{ from{ transform:scaleY(0); } to{ transform:scaleY(1); } }
+.band.settled span{ animation:none; }
+.band-top{ position:absolute; inset-inline:0; inset-block-start:calc(var(--sq) * -1); block-size:var(--sq); display:flex; gap:var(--sq); overflow:hidden; padding-inline-start:calc(var(--sq) * 1.5); }
+.band-top span{ flex:none; inline-size:var(--sq); block-size:var(--sq); background:var(--deep); }
+
+/* ---------- sections ---------- */
+.section{ padding-block:72px 8px; }
+.sec-head{ display:flex; align-items:center; gap:14px; padding-block-end:16px; margin-block-end:12px; border-block-end:1px solid var(--deep-100); }
+.sec-num{ inline-size:36px; block-size:36px; flex:none; display:grid; place-items:center; background:var(--green); color:#fff; font:700 1.1875rem/1 var(--font); font-variant-numeric:tabular-nums; }
+.sec-head h2{ margin:0; font-size:var(--fs-h2); line-height:1.4; font-weight:700; color:var(--teal); }
+.sec-intro{ margin:0 0 32px; max-inline-size:40rem; color:var(--deep-400); font-size:.875rem; line-height:1.65; }
+
+/* tags */
+.tag{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; font:600 .8125rem/1.4 var(--font); border:1px solid transparent; }
+.tag .ic{ inline-size:16px; block-size:16px; }
+.tag-warn{ color:var(--warning); background:var(--warning-bg); border-color:rgb(138 90 0 / .25); }
+.tag-danger{ color:var(--danger); background:var(--danger-bg); border-color:rgb(180 35 24 / .25); }
+.tag-muted{ color:var(--deep-400); background:var(--box); }
+.tag-ok{ color:var(--green-700); background:var(--green-100); }
+
+/* seat meter: 10 bricks, filled = seats taken */
+.meter{ display:inline-flex; gap:3px; flex:none; }
+.meter i{ inline-size:14px; block-size:7px; background:var(--deep-100); }
+.meter i.on{ background:var(--teal); }
+.on-dark .meter i{ background:rgb(220 233 235 / .22); }
+.on-dark .meter i.on{ background:var(--mint); }
+
+/* event card */
+.cards{ display:grid; gap:16px; }
+@media (min-width:768px){ .cards{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+@media (min-width:1024px){ .cards{ grid-template-columns:repeat(3, minmax(0,1fr)); gap:24px; } }
+.card-wrap{ display:flex; flex-direction:column; gap:8px; }
+.ecard{ position:relative; display:grid; grid-template-columns:84px minmax(0,1fr); background:#fff; border:1px solid var(--deep-100); min-block-size:212px; flex:1; }
+.ecard::before{ content:""; position:absolute; inset-inline:-1px; inset-block-start:-1px; block-size:2px; background:var(--teal); transform:scaleX(0); transform-origin:var(--origin-start); transition:transform var(--dur-base) var(--ease); }
+.ecard:hover::before, .ecard:focus-within::before{ transform:scaleX(1); }
+.ecard-date{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:16px 6px; background:var(--box); text-align:center; }
+.ecard-date .d{ font-size:2.5rem; line-height:1.1; font-weight:700; color:var(--teal); font-variant-numeric:tabular-nums; }
+.ecard-date .m{ font:600 .8125rem/1.4 var(--font); }
+.ecard-date .w{ font-size:.8125rem; line-height:1.4; color:var(--deep-400); }
+.ecard-body{ display:flex; flex-direction:column; gap:8px; padding:16px 20px 18px; min-inline-size:0; }
+.ecard-dept{ margin:0; font:600 .8125rem/1.4 var(--font); color:var(--green-700); }
+.ecard-title{ margin:0; font-size:var(--fs-h3); line-height:1.5; font-weight:600; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.ecard-title a{ color:var(--deep); text-decoration:none; }
+.ecard-title a::after{ content:""; position:absolute; inset:0; }
+.ecard-title a:hover{ text-decoration:underline; }
+.meta{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; font-size:.875rem; line-height:1.65; color:var(--deep-400); }
+.meta li{ display:flex; align-items:center; gap:8px; }
+.ecard-status{ margin-block-start:auto; padding-block-start:6px; display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; font-size:.875rem; }
+.ecard-status a{ position:relative; z-index:1; display:inline-flex; align-items:center; gap:6px; min-block-size:44px; font-weight:600; }
+.is-cancelled .ecard-title a, .is-cancelled .ecard-date .d, .is-ended .ecard-date .d{ color:var(--deep-400); }
+
+/* register-button state sheet */
+.sheet{ display:grid; gap:24px 16px; }
+@media (min-width:640px){ .sheet{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+@media (min-width:1024px){ .sheet{ grid-template-columns:repeat(3, minmax(0,1fr)); gap:32px 24px; } }
+.sheet-item{ display:flex; flex-direction:column; gap:8px; }
+.abrick{ display:flex; flex-direction:column; gap:14px; flex:1; min-block-size:248px; padding:20px; background:#fff; border:1px solid var(--deep-100); border-block-start:2px solid var(--teal); }
+.abrick[data-s="cancelled"]{ border-block-start-color:var(--danger); }
+.abrick[data-s="ended"], .abrick[data-s="closed"]{ border-block-start-color:var(--deep-200); }
+.ab-when{ margin:0; font:600 .8125rem/1.4 var(--font); color:var(--deep-400); font-variant-numeric:tabular-nums; }
+.ab-seats{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin:0; font-size:.875rem; }
+.ab-status{ display:flex; align-items:center; gap:10px; margin:0; font-weight:600; }
+.ab-status .ic{ inline-size:22px; block-size:22px; }
+.ab-reg{ display:flex; align-items:center; gap:10px; margin:0; padding:14px 16px; background:var(--deep); color:#fff; font-weight:600; }
+.ab-reg .ic{ color:var(--mint); inline-size:22px; block-size:22px; }
+.ab-note{ margin:0; font-size:.875rem; line-height:1.65; color:var(--deep-400); }
+.ab-actions{ margin-block-start:auto; display:flex; flex-direction:column; align-items:stretch; gap:6px; }
+.ab-actions .btn-ghost{ align-self:center; }
+.ab-danger{ display:flex; gap:10px; align-items:flex-start; margin:0; padding:12px 14px; background:var(--danger-bg); color:var(--danger); font-weight:600; }
+.live-log{ margin:28px 0 0; padding:12px 16px; background:var(--box); font:400 13px/1.5 var(--font-en); color:var(--deep-400); }
+.live-log b{ font-family:var(--font); font-weight:600; color:var(--deep); }
+
+/* calendar */
+.cal-nav{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-block-end:20px; }
+.cal-nav h3{ margin:0; font-size:var(--fs-h3); font-weight:600; font-variant-numeric:tabular-nums; }
+.cal{ display:none; inline-size:100%; border-collapse:collapse; table-layout:fixed; }
+.cal-list{ display:block; }
+@media (min-width:768px){ .cal{ display:table; } .cal-list{ display:none; } }
+.cal th{ padding:8px 10px; text-align:start; font:600 .8125rem/1.4 var(--font); color:var(--deep-400); border-block-end:2px solid var(--deep); }
+.cal td{ vertical-align:top; block-size:124px; padding:8px; background:#fff; border:1px solid var(--deep-100); }
+.cal td.weekend{ background:var(--box); }
+.cal td.out{ background:var(--page); }
+.num{ display:inline-grid; place-items:center; min-inline-size:28px; block-size:28px; font:600 .875rem/1 var(--font); font-variant-numeric:tabular-nums; }
+.out .num{ font-weight:400; color:var(--deep-400); }
+td[aria-current="date"] .num{ background:var(--teal); color:#fff; }
+.cal ul, .cal-list ul{ list-style:none; margin:0; padding:0; }
+.cal-ev{ display:block; margin-block-start:6px; padding:4px 8px; border-inline-start:3px solid var(--teal); background:var(--teal-50); color:var(--deep); text-decoration:none; font-size:.8125rem; line-height:1.4; }
+.cal-ev .t{ display:block; font-weight:600; font-variant-numeric:tabular-nums; color:var(--deep-400); }
+.cal-ev .n{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.cal-ev:hover .n, .list-ev:hover .n{ text-decoration:underline; }
+.s-ended{ border-inline-start-color:var(--deep-200); color:var(--deep-400); background:var(--page); }
+.s-cancelled{ border-inline-start-color:var(--danger); background:var(--danger-bg); }
+.s-almost{ border-inline-start-color:var(--warning); background:var(--warning-bg); }
+.s-full{ border-inline-start-color:var(--deep-400); background:var(--box); }
+.cal-ev .b{ display:block; font-weight:600; }
+.s-cancelled .b{ color:var(--danger); } .s-almost .b{ color:var(--warning); }
+.cal-list section{ display:grid; grid-template-columns:64px minmax(0,1fr); gap:12px; padding-block:16px; border-block-start:1px solid var(--deep-100); }
+.list-day{ margin:0; display:flex; flex-direction:column; line-height:1.3; }
+.list-day .fd{ font-size:2rem; line-height:1.1; font-weight:700; color:var(--teal); font-variant-numeric:tabular-nums; }
+.list-day .wd{ font:600 .8125rem/1.4 var(--font); color:var(--deep-400); }
+.list-day.today .fd{ color:var(--deep); }
+.list-ev{ display:block; margin-block-end:8px; padding:10px 12px; min-block-size:44px; border-inline-start:3px solid var(--teal); background:#fff; color:var(--deep); text-decoration:none; }
+.list-ev .t{ display:block; font:600 .8125rem/1.4 var(--font); color:var(--deep-400); font-variant-numeric:tabular-nums; }
+.list-ev .n{ display:block; font-weight:600; line-height:1.5; }
+.list-ev .b{ display:block; font:600 .8125rem/1.4 var(--font); margin-block-start:2px; }
+.list-ev.s-cancelled .b{ color:var(--danger); } .list-ev.s-almost .b{ color:var(--warning); }
+.cal-empty{ display:grid; gap:12px; margin-block-end:20px; padding:24px; background:var(--box); border-inline-start:3px solid var(--teal); }
+.cal-empty h4{ margin:0; font-size:var(--fs-h3); font-weight:600; }
+.cal-empty p{ margin:0; }
+.banner-link{ display:inline-flex; align-items:center; gap:8px; min-block-size:44px; font-weight:600; }
+.field{ display:grid; gap:6px; }
+.field label{ font:600 .8125rem/1.4 var(--font); }
+.alert-form{ display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; }
+.alert-form .field{ flex:1 1 240px; }
+.input{ min-block-size:48px; padding:10px 14px; font:400 1rem/1.4 var(--font); color:var(--deep); background:#fff; border:1.5px solid var(--teal-400); border-radius:0; }
+.input[dir="ltr"]{ text-align:end; }
+.input::placeholder{ color:var(--deep-400); opacity:1; }
+
+/* footer */
+.site-footer{ position:relative; margin-block-start:96px; padding-block:56px 40px; background:var(--deep); color:var(--teal-100); }
+.foot-grid{ display:grid; gap:28px; }
+@media (min-width:1024px){ .foot-grid{ grid-template-columns:repeat(12, minmax(0,1fr)); gap:24px; } .foot-main{ grid-column:1 / span 7; } .foot-side{ grid-column:9 / span 4; } }
+.closing{ margin:20px 0 12px; font-size:var(--fs-h3); line-height:1.5; font-weight:700; color:#fff; max-inline-size:26em; }
+.foot-about{ margin:0; font-size:.875rem; line-height:1.65; max-inline-size:36rem; }
+.foot-side p{ margin:0 0 8px; font-size:.875rem; }
+.foot-side a{ color:var(--mint); }
+
+/* lab (prototype checks) */
+.lab{ font-family:var(--font-en); }
+.lab .sec-head h2{ font-family:var(--font-en); }
+.checks{ display:grid; gap:16px; }
+@media (min-width:1024px){ .checks{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+.check{ background:#fff; border:1px solid var(--deep-100); padding:20px; font-size:14px; line-height:1.6; }
+.check h3{ margin:0 0 10px; font-size:16px; font-weight:600; color:var(--deep); }
+.check table{ inline-size:100%; border-collapse:collapse; font-size:13px; }
+.check td, .check th{ padding:6px 8px; border-block-end:1px solid var(--deep-100); text-align:start; vertical-align:top; }
+.check .ar{ font-family:var(--font); direction:rtl; }
+.pass{ color:var(--green-700); font-weight:600; } .fail{ color:var(--danger); font-weight:600; } .warnc{ color:var(--warning); font-weight:600; }
+.spec-row{ display:flex; flex-direction:column; gap:4px; margin-block:10px; }
+.swatch{ display:inline-block; inline-size:14px; block-size:14px; vertical-align:middle; border:1px solid var(--deep-100); }
+
+dialog{ border:0; padding:0; inline-size:min(440px, 100% - 40px); background:#fff; color:var(--deep); box-shadow:0 24px 64px rgb(2 44 51 / .3); }
+dialog::backdrop{ background:rgb(2 44 51 / .6); }
+dialog[open]{ animation:dlg var(--dur-base) var(--ease); }
+@keyframes dlg{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+.dlg-body{ padding:24px; border-block-start:3px solid var(--teal); }
+.dlg-body h2{ margin:0 0 8px; font-size:var(--fs-h3); line-height:1.5; font-weight:600; }
+.dlg-body p{ margin:0 0 20px; color:var(--deep-400); }
+.dlg-actions{ display:flex; flex-wrap:wrap; gap:8px; }
+
+/* reduced motion (system setting, or simulated with the toolbar) */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation-duration:1ms !important; animation-delay:0ms !important; animation-iteration-count:1 !important; transition-duration:1ms !important; }
+  .spin{ animation:none !important; }
+}
+html.rm *, html.rm *::before, html.rm *::after{ animation-duration:1ms !important; animation-delay:0ms !important; animation-iteration-count:1 !important; transition-duration:1ms !important; }
+html.rm .spin{ animation:none !important; }
+</style>
+</head>
+<body>
+
+<div class="proto-bar" dir="ltr" lang="en">
+  <div class="container">
+    <span><strong>Prototype</strong> · Direction A «لبنة» · throwaway, not app code · "now" fixed at 14 Nov 2026 15:00 Riyadh</span>
+    <span class="sp"></span>
+    <button type="button" id="replay">Replay band</button>
+    <button type="button" id="rm" aria-pressed="false">Simulate reduced motion</button>
+    <button type="button" id="clean" aria-pressed="false">Hide «مؤقت» markers</button>
+  </div>
+</div>
+
+<a class="skip" href="#main">تخطَّ إلى المحتوى<span class="tmp">«مؤقت»</span></a>
+<div class="hairline" aria-hidden="true"></div>
+
+<div class="plate on-dark">
+  <header class="site-header container">
+    <a class="logo" href="#" aria-label="حصن — الصفحة الرئيسية">
+      <!-- horizontal lockup, reversed (kit: 01-logo/svg/hisn-lockup-horizontal-reversed.svg, metadata stripped).
+           Inline so the wordmark uses the loaded Plex Arabic; the app will use an outlined copy (discovery G-2). -->
+      <svg viewBox="0 0 416.63 202.24" role="img" aria-hidden="true">
+        <g transform="translate(234.51 -5.88)">
+          <defs><linearGradient id="hhr" x1="35" y1="20" x2="170" y2="185" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#5FD4AA"/><stop offset="0.5" stop-color="#2DB98A"/><stop offset="1" stop-color="#17806F"/></linearGradient></defs>
+          <path d="M40 28 H56 V40 H66 V28 H82 V40 H92 V28 H108 V40 H118 V28 H134 V40 H144 V28 H160 V112 C160 150 132 174 100 186 C68 174 40 150 40 112 Z" fill="url(#hhr)"/>
+          <path d="M76 172 V106 L100 76 L124 106 V172 C116 176 108 179 100 182 C92 179 84 176 76 172 Z" fill="#022C33"/>
+          <path d="M100 116 L111 130 L100 144 L89 130 Z" fill="url(#hhr)"/>
+        </g>
+        <text x="242.91" y="112.12" text-anchor="start" direction="rtl" font-family="'IBM Plex Sans Arabic', sans-serif" font-weight="700" font-size="94.80" fill="#FFFFFF">حصن</text>
+      </svg>
+    </a>
+    <nav class="nav" aria-label="الرئيسية">
+      <div class="dd">
+        <button type="button" aria-expanded="false" aria-controls="dd-depts" id="dd-btn">الأقسام<span class="tmp">«مؤقت»</span><span data-icon="chevronDown"></span></button>
+        <ul class="dd-panel" id="dd-depts" hidden></ul>
+      </div>
+      <a href="#calendar" aria-current="page">الفعاليات</a>
+      <a href="#">التخصصات<span class="tmp">«مؤقت»</span></a>
+      <a href="#">المكتبة</a>
+      <a href="#">قاعدة المواهب</a>
+    </nav>
+    <div class="header-end">
+      <a class="btn btn-secondary btn-sm auth" href="#" data-testid="auth-entry"><span data-icon="logIn" data-mirror></span><span class="lbl">تسجيل الدخول<span class="tmp">«مؤقت»</span></span></a>
+      <button type="button" class="icon-btn menu" aria-expanded="false" aria-controls="mnav" id="menu-btn"><span class="vh">القائمة<span class="tmp">«مؤقت»</span></span><span data-icon="menu"></span></button>
+    </div>
+  </header>
+  <nav class="mnav container" id="mnav" hidden aria-label="القائمة">
+    <ul>
+      <li><a href="#">الأقسام<span class="tmp">«مؤقت»</span></a></li>
+      <li><a href="#calendar">الفعاليات</a></li>
+      <li><a href="#">التخصصات<span class="tmp">«مؤقت»</span></a></li>
+      <li><a href="#">المكتبة</a></li>
+      <li><a href="#">قاعدة المواهب</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero container" aria-labelledby="hero-title">
+    <div class="hero-main">
+      <p class="kicker"><span class="marks" aria-hidden="true"><i></i><i></i><i></i></span>جامعة الملك فهد للبترول والمعادن</p>
+      <h1 class="display" id="hero-title">كل تخصص <span class="accent">لبنة</span> في حصن الوطن</h1>
+      <p class="lede">«حصن» مبادرة طلابية في جامعة الملك فهد للبترول والمعادن، تعمل على مدار العام حاضنةً لمواهب الصناعات الدفاعية: تعرّف الطلاب بالقطاع، وتؤهلهم لأدواره، وتصلهم بجهاته.</p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="#">ابحث عن تخصصك<span class="tmp">«مؤقت»</span></a>
+        <a class="btn btn-secondary" href="#calendar">تقويم الفعاليات<span class="tmp">«مؤقت»</span></a>
+      </div>
+    </div>
+    <aside class="next-brick" aria-labelledby="nb-label" id="next-brick"></aside>
+  </section>
+
+  <div class="band" id="band" aria-hidden="true"></div>
+</div>
+
+<main id="main">
+
+  <section class="section container" aria-labelledby="h-cards">
+    <div class="sec-head"><span class="sec-num">٠١</span><h2 id="h-cards">بطاقة الفعالية<span class="tmp">«مؤقت»</span></h2><span class="marks" aria-hidden="true"><i></i><i></i><i></i></span></div>
+    <p class="sec-intro">ست حالات للبطاقة نفسها كما تظهر في الصفحة الرئيسية وصفحات الأقسام. مرّر المؤشر أو انتقل بلوحة المفاتيح لترى حافة البطاقة.<span class="tmp">«مؤقت»</span></p>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section class="section container" aria-labelledby="h-states">
+    <div class="sec-head"><span class="sec-num">٠٢</span><h2 id="h-states">زر التسجيل: كل الحالات<span class="tmp">«مؤقت»</span></h2><span class="marks" aria-hidden="true"><i></i><i></i><i></i></span></div>
+    <p class="sec-intro">بطاقة الإجراء في صفحة الفعالية بحالاتها الثماني، ومعها حالتا «غير مسجّل الدخول» و«قيد التنفيذ». جرّب «سجّل» و«إلغاء التسجيل» و«انضم لقائمة الانتظار»: تُعلَن النتيجة لقارئ الشاشة.<span class="tmp">«مؤقت»</span></p>
+    <div class="sheet" id="sheet"></div>
+    <p class="live-log" dir="ltr" lang="en">Screen reader (polite live region) last said: <b id="live-echo" dir="rtl" lang="ar">—</b></p>
+  </section>
+
+  <section class="section container" id="calendar" aria-labelledby="h-cal">
+    <div class="sec-head"><span class="sec-num">٠٣</span><h2 id="h-cal">تقويم الفعاليات<span class="tmp">«مؤقت»</span></h2><span class="marks" aria-hidden="true"><i></i><i></i><i></i></span></div>
+    <p class="sec-intro">شبكة شهرية من ٧٦٨ بكسل فأكثر، وقائمة مجمّعة حسب اليوم على الجوال. الأسبوع يبدأ بالأحد، والجمعة والسبت مظلّلان. جرّب ديسمبر لترى الحالة الفارغة.<span class="tmp">«مؤقت»</span></p>
+    <div class="cal-nav">
+      <button type="button" class="btn btn-secondary btn-sm" id="prev"><span data-icon="chevronLeft" data-mirror></span><span id="prev-label"></span></button>
+      <h3 id="month-label" aria-live="polite"></h3>
+      <button type="button" class="btn btn-secondary btn-sm" id="next"><span id="next-label"></span><span data-icon="chevronRight" data-mirror></span></button>
+    </div>
+    <div id="cal-empty"></div>
+    <table class="cal" id="cal-table"></table>
+    <div class="cal-list" id="cal-list"></div>
+  </section>
+
+  <section class="section container lab" dir="ltr" lang="en" aria-labelledby="h-lab">
+    <div class="sec-head"><span class="sec-num" style="font-family:var(--font)">٠٤</span><h2 id="h-lab">Prototype checks (computed live in this browser)</h2></div>
+    <p class="sec-intro">Answers to the open items in the discovery doc: digits and tabular figures in Plex Arabic, Plex Arabic's Latin vs IBM Plex Sans, which weights loaded, Intl output for the D1-7 change, Arabic plurals, and contrast of every pair used on this page.</p>
+    <div class="checks" id="checks"></div>
+  </section>
+</main>
+
+<footer class="site-footer on-dark">
+  <div class="band-top" id="band-top" aria-hidden="true"></div>
+  <div class="container foot-grid">
+    <div class="foot-main">
+      <a class="logo" href="#" aria-label="حصن — الصفحة الرئيسية" id="foot-logo"></a>
+      <p class="closing">«أول خطوة في بناء صناعة دفاعية وطنية هي بناء من يفهمها»</p>
+      <p class="foot-about">«حصن» مبادرة طلابية في جامعة الملك فهد للبترول والمعادن، تعمل على مدار العام حاضنةً لمواهب الصناعات الدفاعية: تعرّف الطلاب بالقطاع، وتؤهلهم لأدواره، وتصلهم بجهاته.</p>
+    </div>
+    <div class="foot-side">
+      <p>للتواصل<span class="tmp">«مؤقت»</span>: <a href="mailto:Contact@Hisn-sa.org"><bdi lang="en">Contact@Hisn-sa.org</bdi></a></p>
+      <p><a href="#">سياسة الخصوصية<span class="tmp">«مؤقت»</span></a></p>
+    </div>
+  </div>
+</footer>
+
+<dialog id="confirm" aria-labelledby="dlg-title" aria-describedby="dlg-text">
+  <form method="dialog" class="dlg-body">
+    <h2 id="dlg-title"></h2>
+    <p id="dlg-text"></p>
+    <div class="dlg-actions">
+      <button class="btn btn-danger" value="confirm" id="dlg-ok"></button>
+      <button class="btn btn-secondary" value="cancel" autofocus>تراجع<span class="tmp">«مؤقت»</span></button>
+    </div>
+  </form>
+</dialog>
+<div class="vh" aria-live="polite" id="live"></div>
+
+<script>
+"use strict";
+/* ---------- formatting (the D1-7 proposal: nu-arab for display) ---------- */
+const TZ = 'Asia/Riyadh';
+const LOC = 'ar-SA-u-ca-gregory-nu-arab';
+const NOW = new Date('2026-11-14T12:00:00Z');           // Sat 14 Nov 2026, 15:00 Riyadh
+const T = '<span class="tmp">«مؤقت»</span>';
+const dtf = o => new Intl.DateTimeFormat(LOC, { timeZone: TZ, ...o });
+const F = {
+  day: dtf({ day: 'numeric' }), month: dtf({ month: 'long' }), weekday: dtf({ weekday: 'long' }),
+  monthYear: dtf({ month: 'long', year: 'numeric' }), time: dtf({ hour: 'numeric', minute: '2-digit' }),
+  full: dtf({ weekday: 'long', day: 'numeric', month: 'long' }),
+};
+const NUM = new Intl.NumberFormat(LOC);
+const KEY = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+const dateKey = iso => KEY.format(new Date(iso));
+const timeRange = (a, b) => { try { return F.time.formatRange(new Date(a), new Date(b)); } catch (e) { return F.time.format(new Date(a)) + '–' + F.time.format(new Date(b)); } };
+
+/* Arabic plurals (discovery G-8): Intl.PluralRules('ar') → zero/one/two/few/many/other */
+const PR = new Intl.PluralRules('ar');
+const SEATS = { zero: 'لم يتبقَّ أي مقعد', one: 'تبقّى مقعد واحد', two: 'تبقّى مقعدان', few: 'تبقّى {n} مقاعد', many: 'تبقّى {n} مقعدًا', other: 'تبقّى {n} مقعد' };
+const seatsText = n => SEATS[PR.select(n)].replace('{n}', NUM.format(n));
+
+/* ---------- icons (Lucide paths, stroke 1.75) ---------- */
+const P = {
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  pin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  video: '<path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
+  calPlus: '<path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18"/><path d="M16 19h6"/><path d="M19 16v6"/>',
+  calendar: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+  chevronRight: '<path d="m9 18 6-6-6-6"/>', chevronLeft: '<path d="m15 18-6-6 6-6"/>', chevronDown: '<path d="m6 9 6 6 6-6"/>',
+  arrowRight: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+  lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  ban: '<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>',
+  alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  hourglass: '<path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/>',
+  menu: '<path d="M4 12h16"/><path d="M4 6h16"/><path d="M4 18h16"/>',
+  loader: '<path d="M21 12a9 9 0 1 1-6.219-8.56"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  logIn: '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>',
+};
+const icon = (n, o = {}) => `<svg class="ic${o.mirror ? ' mirror' : ''}${o.cls ? ' ' + o.cls : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+document.querySelectorAll('[data-icon]').forEach(el => { el.outerHTML = icon(el.dataset.icon, { mirror: el.hasAttribute('data-mirror') }); });
+
+/* ---------- sample data (draft; every title carries «مؤقت») ---------- */
+const DEPTS = ['التوعية بالقطاع', 'التأهيل المهني', 'الأنظمة والتكامل', 'الأمن السيبراني', 'التصنيع والتصميم', 'البيانات والتحليل'];
+const E = [
+  { id: 1, title: 'الصناعات الدفاعية أوسع مما تظن', dept: 0, starts: '2026-10-27T15:00:00Z', ends: '2026-10-27T17:00:00Z', format: 'in_person', location: 'قاعة المحاضرات الرئيسية', capacity: 60, seatsLeft: 0, status: 'published', recording: 'https://youtu.be/x' },
+  { id: 2, title: 'كيف تقرأ وصفًا وظيفيًا في القطاع الدفاعي', dept: 1, starts: '2026-11-03T15:00:00Z', ends: '2026-11-03T17:00:00Z', format: 'online', location: null, capacity: null, seatsLeft: null, status: 'published', recording: 'https://youtu.be/y' },
+  { id: 3, title: 'ورشة: أساسيات سلاسل الإمداد', dept: 4, starts: '2026-11-10T16:00:00Z', ends: '2026-11-10T18:00:00Z', format: 'in_person', location: 'مبنى ٢٤ · قاعة ١٠٨', capacity: 30, seatsLeft: 3, status: 'published', recording: null },
+  { id: 4, title: 'مدخل إلى هندسة الأنظمة في القطاع الدفاعي', dept: 2, starts: '2026-11-18T15:00:00Z', ends: '2026-11-18T17:00:00Z', format: 'in_person', location: 'مبنى ٥٨ · قاعة ١٠٢', capacity: 30, seatsLeft: 12, status: 'published', recording: null },
+  { id: 5, title: 'الأمن السيبراني بعيون غير المبرمجين', dept: 3, starts: '2026-11-22T16:00:00Z', ends: '2026-11-22T18:00:00Z', format: 'in_person', location: 'مبنى ٢٢ · المسرح', capacity: 40, seatsLeft: 4, status: 'published', recording: null },
+  { id: 6, title: 'ورشة: التصميم الصناعي للمنتجات التقنية', dept: 4, starts: '2026-11-24T15:00:00Z', ends: '2026-11-24T17:30:00Z', format: 'in_person', location: 'مبنى ١٩ · المعمل', capacity: 20, seatsLeft: 9, status: 'cancelled', recording: null },
+  { id: 7, title: 'لقاء مفتوح: أين يعمل خريجو الإدارة في القطاع؟', dept: 1, starts: '2026-11-26T15:00:00Z', ends: '2026-11-26T16:30:00Z', format: 'in_person', location: 'كلية الإدارة الصناعية', capacity: 25, seatsLeft: 0, status: 'published', recording: null },
+  { id: 8, title: 'البيانات والذكاء الاصطناعي في الصناعة', dept: 5, starts: '2026-11-26T18:00:00Z', ends: '2026-11-26T19:30:00Z', format: 'online', location: null, capacity: null, seatsLeft: null, status: 'published', recording: null },
+  { id: 9, title: 'ورشة: سيرة ذاتية لقطاع تقني', dept: 1, starts: '2026-11-30T15:00:00Z', ends: '2026-11-30T17:00:00Z', format: 'in_person', location: 'مبنى ٥٨ · قاعة ١٠٢', capacity: 30, seatsLeft: 20, status: 'published', recording: null },
+].map(e => ({ ...e, closes: e.starts }));
+
+/* dev-1 D1-7 rules, verbatim */
+const ALMOST = 0.2;
+const isAlmostFull = (cap, left) => cap !== null && left !== null && 0 < left && left <= Math.max(1, Math.floor(cap * ALMOST));
+function eventState(e, mine, now = NOW) {
+  if (e.status === 'cancelled') return 'cancelled';
+  if (now >= new Date(e.ends)) return 'ended';
+  if (mine === 'registered') return 'registered';
+  if (mine === 'waitlisted') return 'waitlisted';
+  if (now >= new Date(e.closes)) return 'closed';
+  if (e.seatsLeft === 0) return 'full';
+  if (isAlmostFull(e.capacity, e.seatsLeft)) return 'open_almost_full';
+  return 'open';
+}
+const t = s => s + T;   // mark draft copy
+const meter = e => {
+  if (!e.capacity) return '';
+  const on = Math.round(((e.capacity - e.seatsLeft) / e.capacity) * 10);
+  return `<span class="meter" aria-hidden="true">${Array.from({ length: 10 }, (_, i) => `<i class="${i < on ? 'on' : ''}"></i>`).join('')}</span>`;
+};
+const where = e => e.format === 'online'
+  ? `<li>${icon('video')}<span>عن بُعد${T}</span></li>`
+  : `<li>${icon('pin')}<span>${e.location}${T}</span></li>`;
+const tag = (kind, ic, text) => `<span class="tag tag-${kind}">${icon(ic)}${text}</span>`;
+
+/* ---------- hero: next-event brick (real data in the app: upcomingEvents({limit:1})) ---------- */
+function renderNext() {
+  const e = E.find(x => new Date(x.starts) > NOW && x.status === 'published');
+  const d = new Date(e.starts);
+  document.getElementById('next-brick').innerHTML = `
+    <p class="nb-label" id="nb-label"><span>${t('الفعالية القادمة')}</span><span class="marks" aria-hidden="true"><i></i><i></i><i></i></span></p>
+    <div class="nb-date">
+      <span class="figure">${F.day.format(d)}</span>
+      <p><span class="nb-month">${F.monthYear.format(d)}</span><span class="nb-when">${F.weekday.format(d)} · ${timeRange(e.starts, e.ends)}</span></p>
+    </div>
+    <h2 class="nb-title">${t(e.title)}</h2>
+    <p class="nb-dept">${t(DEPTS[e.dept])}</p>
+    <p class="nb-seats">${meter(e)}<span>${t(seatsText(e.seatsLeft))}</span></p>
+    <a class="nb-link" href="#states">${t('التفاصيل والتسجيل')}${icon('arrowRight', { mirror: true })}</a>`;
+}
+
+/* ---------- signature 2: battlement band ---------- */
+function buildBands() {
+  const sq = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sq'));
+  const n = Math.ceil(window.innerWidth / (sq * 2)) + 1;
+  const stagger = Math.min(30, 680 / Math.max(1, n - 1));   // keep the whole lay-in ≈ 900 ms on any width
+  const band = document.getElementById('band');
+  band.style.setProperty('--stagger', stagger.toFixed(1) + 'ms');
+  band.innerHTML = Array.from({ length: n }, (_, i) => `<span style="--i:${i}"></span>`).join('');
+  document.getElementById('band-top').innerHTML = Array.from({ length: n }, () => '<span></span>').join('');
+}
+
+/* ---------- event cards ---------- */
+function cardHTML(e, note) {
+  const st = eventState(e, null), d = new Date(e.starts);
+  let status = '';
+  if (st === 'cancelled') status = tag('danger', 'ban', 'أُلغيت');
+  else if (st === 'ended') status = tag('muted', 'check', 'انتهت') + (e.recording ? `<a href="#">${icon('play')}شاهد التسجيل</a>` : '');
+  else if (st === 'open_almost_full') status = tag('warn', 'alert', 'المقاعد شارفت على الاكتمال!') + meter(e);
+  else if (st === 'full') status = tag('muted', 'users', t('اكتملت المقاعد'));
+  else status = e.capacity ? `${meter(e)}<span>${t(seatsText(e.seatsLeft))}</span>` : `<span>${t('التسجيل مفتوح')}</span>`;
+  const cls = st === 'cancelled' ? ' is-cancelled' : st === 'ended' ? ' is-ended' : '';
+  return `<div class="card-wrap"><p class="proto-note" dir="ltr" lang="en">${note}</p>
+    <article class="ecard${cls}">
+      <div class="ecard-date" aria-hidden="true"><span class="d">${F.day.format(d)}</span><span class="m">${F.month.format(d)}</span><span class="w">${F.weekday.format(d)}</span></div>
+      <div class="ecard-body">
+        <p class="ecard-dept">${t(DEPTS[e.dept])}</p>
+        <h3 class="ecard-title"><a href="#states">${t(e.title)}<span class="vh">، ${F.full.format(d)}</span></a></h3>
+        <ul class="meta"><li>${icon('clock')}<span>${timeRange(e.starts, e.ends)}</span></li>${where(e)}</ul>
+        <div class="ecard-status">${status}</div>
+      </div>
+    </article></div>`;
+}
+function renderCards() {
+  const pick = [[4, 'open'], [5, 'almost full'], [7, 'full'], [6, 'cancelled'], [2, 'ended · with recording'], [3, 'ended · no recording']];
+  document.getElementById('cards').innerHTML = pick.map(([id, note]) => cardHTML(E.find(e => e.id === id), note)).join('');
+}
+
+/* ---------- register button state sheet ---------- */
+const base = E.find(e => e.id === 4);
+const SHEET = [
+  { s: 'open', note: 'open', seats: 12 },
+  { s: 'open_almost_full', note: 'open · almost full', seats: 4 },
+  { s: 'registered', note: 'registered', seats: 11 },
+  { s: 'full', note: 'full', seats: 0 },
+  { s: 'waitlisted', note: 'waitlisted · position 3', seats: 0, pos: 3 },
+  { s: 'closed', note: 'closed', seats: 7 },
+  { s: 'cancelled', note: 'cancelled', seats: 12 },
+  { s: 'ended', note: 'ended · with recording', seats: 0, rec: true },
+  { s: 'open', note: 'signed out (any actionable state)', seats: 12, signedOut: true },
+  { s: 'pending', note: 'pending (after pressing سجّل)', seats: 12 },
+];
+function actionHTML(item) {
+  const e = { ...base, seatsLeft: item.seats };
+  const when = `<p class="ab-when">${F.full.format(new Date(e.starts))} · ${timeRange(e.starts, e.ends)}</p>`;
+  const seats = `<p class="ab-seats">${meter(e)}<span>${item.seats > 0 ? t(seatsText(item.seats)) : t('لا مقاعد متاحة')}</span></p>`;
+  const signIn = `<a class="btn btn-primary btn-block" href="#">${icon('logIn', { mirror: true })}سجّل</a><p class="ab-note" style="text-align:center">${t('سيُطلب منك تسجيل الدخول أولًا')}</p>`;
+  switch (item.s) {
+    case 'open': return when + seats + `<div class="ab-actions">${item.signedOut ? signIn : `<button class="btn btn-primary btn-block" data-act="register">سجّل</button>`}</div>`;
+    case 'open_almost_full': return when + `<p class="ab-status">${tag('warn', 'alert', 'المقاعد شارفت على الاكتمال!')}</p>` + seats + `<div class="ab-actions"><button class="btn btn-primary btn-block" data-act="register">سجّل</button></div>`;
+    case 'registered': return when + `<p class="ab-reg">${icon('check')}مسجّل</p><p class="ab-note">${t('أرسلنا التفاصيل إلى بريدك. رابط الحضور يصلك قبل الموعد.')}</p>` + `<div class="ab-actions"><a class="btn btn-secondary btn-block" href="#">${icon('calPlus')}${t('أضف إلى تقويمك')}</a><button class="btn btn-ghost" data-act="cancel">إلغاء التسجيل</button></div>`;
+    case 'full': return when + `<p class="ab-status">${icon('users')}اكتملت المقاعد</p>` + seats + `<div class="ab-actions"><button class="btn btn-secondary btn-block" data-act="join">انضم لقائمة الانتظار</button><p class="ab-note" style="text-align:center">${t('نبلغك فور توفر مقعد.')}</p></div>`;
+    case 'waitlisted': return when + `<p class="ab-status">${icon('hourglass')}${t(`ترتيبك ${NUM.format(item.pos || 1)} في قائمة الانتظار`)}</p><p class="ab-note">${t('إذا توفر مقعد سُجّلت تلقائيًا ووصلك بريد.')}</p>` + `<div class="ab-actions"><button class="btn btn-ghost" data-act="leave">مغادرة القائمة</button></div>`;
+    case 'closed': return when + `<p class="ab-status">${icon('lock')}أُغلق التسجيل</p><p class="ab-note">${t('لا تفوّت القادمة: انضم لقائمة التنبيهات.')}</p>` + `<div class="ab-actions"><a class="btn btn-secondary btn-block" href="#calendar">${icon('bell')}${t('قائمة التنبيهات')}</a></div>`;
+    case 'cancelled': return when + `<p class="ab-danger">${icon('ban')}<span>أُلغيت الفعالية<br><span style="font-weight:400">${t('نعتذر عن الإلغاء. أُبلغ المسجّلون بالبريد.')}</span></span></p>` + `<div class="ab-actions"><a class="btn btn-secondary btn-block" href="#calendar">${t('فعاليات أخرى')}</a></div>`;
+    case 'ended': return when + `<p class="ab-status">${icon('check')}انتهت</p>` + `<div class="ab-actions">${item.rec ? `<a class="btn btn-primary btn-block" href="#">${icon('play')}شاهد التسجيل</a>` : `<a class="btn btn-secondary btn-block" href="#">${t('المكتبة')}</a>`}</div>`;
+    case 'pending': return when + seats + `<div class="ab-actions"><button class="btn btn-primary btn-block" disabled aria-disabled="true">${icon('loader', { cls: 'spin' })}${t('جارٍ التسجيل…')}</button></div>`;
+  }
+}
+function renderSheet() {
+  document.getElementById('sheet').innerHTML = SHEET.map((it, i) =>
+    `<div class="sheet-item"><p class="proto-note" dir="ltr" lang="en">${it.note}</p><div class="abrick" data-i="${i}" data-s="${it.s}" aria-busy="${it.s === 'pending'}">${actionHTML(it)}</div></div>`).join('');
+}
+function announce(msg) {
+  const live = document.getElementById('live');
+  live.textContent = ''; setTimeout(() => { live.textContent = msg; }, 50);
+  document.getElementById('live-echo').textContent = msg;
+}
+function transition(i, to, msg, extra = {}) {
+  const it = SHEET[i], prev = { ...it };
+  Object.assign(it, { s: 'pending' }); renderOne(i);
+  setTimeout(() => { Object.assign(it, prev, { s: to }, extra); renderOne(i); announce(msg); const b = document.querySelector(`.abrick[data-i="${i}"] button, .abrick[data-i="${i}"] a`); b && b.focus(); }, 900);
+}
+function renderOne(i) {
+  const el = document.querySelector(`.abrick[data-i="${i}"]`);
+  el.dataset.s = SHEET[i].s; el.setAttribute('aria-busy', SHEET[i].s === 'pending'); el.innerHTML = actionHTML(SHEET[i]);
+}
+const dlg = document.getElementById('confirm');
+function confirmThen(title, text, ok, fn) {
+  document.getElementById('dlg-title').innerHTML = t(title);
+  document.getElementById('dlg-text').innerHTML = t(text);
+  document.getElementById('dlg-ok').innerHTML = t(ok);
+  dlg.returnValue = '';
+  dlg.showModal();
+  dlg.addEventListener('close', () => { if (dlg.returnValue === 'confirm') fn(); }, { once: true });
+}
+document.getElementById('sheet').addEventListener('click', ev => {
+  const btn = ev.target.closest('[data-act]'); if (!btn) return;
+  const i = +btn.closest('.abrick').dataset.i, act = btn.dataset.act;
+  const title = 'مدخل إلى هندسة الأنظمة';
+  if (act === 'register') transition(i, 'registered', `تم تسجيلك في «${title}»«مؤقت»`, { seats: Math.max(0, SHEET[i].seats - 1) });
+  if (act === 'join') transition(i, 'waitlisted', `انضممت لقائمة الانتظار، ترتيبك ${NUM.format(3)}«مؤقت»`, { pos: 3 });
+  if (act === 'cancel') confirmThen('إلغاء التسجيل؟', 'سيُتاح مقعدك لغيرك، ويمكنك التسجيل مجددًا إن توفر مقعد.', 'نعم، ألغِ التسجيل', () => transition(i, 'open', 'أُلغي تسجيلك«مؤقت»', { seats: SHEET[i].seats + 1 }));
+  if (act === 'leave') confirmThen('مغادرة قائمة الانتظار؟', 'ستفقد ترتيبك الحالي في القائمة.', 'نعم، غادر القائمة', () => transition(i, 'full', 'غادرت قائمة الانتظار«مؤقت»'));
+});
+
+/* ---------- calendar (dev-1 D1-10 rules: weeks start Sunday, whole weeks, Riyadh day keys) ---------- */
+const MONTHS = ['2026-10', '2026-11', '2026-12'];
+let month = '2026-11';
+const todayKey = dateKey(NOW.toISOString());
+const monthDate = m => new Date(m + '-15T12:00:00Z');
+function buildMonthGrid(m) {
+  const [y, mo] = m.split('-').map(Number);
+  const first = new Date(Date.UTC(y, mo - 1, 1)), last = new Date(Date.UTC(y, mo, 0));
+  const start = new Date(first); start.setUTCDate(1 - first.getUTCDay());
+  const end = new Date(last); end.setUTCDate(last.getUTCDate() + (6 - last.getUTCDay()));
+  const cells = [];
+  for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) cells.push(d.toISOString().slice(0, 10));
+  return cells;
+}
+const calState = e => { const s = eventState(e, null); return s === 'open_almost_full' ? 'almost' : s; };
+const badge = s => s === 'ended' ? 'انتهت' : s === 'cancelled' ? 'أُلغيت' : s === 'almost' ? 'المقاعد شارفت على الاكتمال!' : s === 'full' ? t('اكتملت المقاعد') : '';
+const dayNum = key => NUM.format(+key.slice(8));
+const WEEKDAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+function renderCalendar() {
+  const inMonth = E.filter(e => dateKey(e.starts).slice(0, 7) === month);
+  const byDay = {}; inMonth.forEach(e => { (byDay[dateKey(e.starts)] ||= []).push(e); });
+  const i = MONTHS.indexOf(month);
+  document.getElementById('month-label').textContent = F.monthYear.format(monthDate(month));
+  const prev = document.getElementById('prev'), next = document.getElementById('next');
+  prev.disabled = i === 0; next.disabled = i === MONTHS.length - 1;
+  document.getElementById('prev-label').textContent = i > 0 ? F.month.format(monthDate(MONTHS[i - 1])) : '';
+  document.getElementById('next-label').textContent = i < MONTHS.length - 1 ? F.month.format(monthDate(MONTHS[i + 1])) : '';
+  prev.setAttribute('aria-label', i > 0 ? 'الشهر السابق: ' + F.monthYear.format(monthDate(MONTHS[i - 1])) : 'الشهر السابق');
+  next.setAttribute('aria-label', i < MONTHS.length - 1 ? 'الشهر التالي: ' + F.monthYear.format(monthDate(MONTHS[i + 1])) : 'الشهر التالي');
+
+  // empty state + next-event banner (dev-1: shown when no event in the month starts after now)
+  const hasFuture = inMonth.some(e => new Date(e.starts) > NOW);
+  const upcoming = E.find(e => new Date(e.starts) > NOW && e.status === 'published');
+  let empty = '';
+  if (!inMonth.length || !hasFuture) {
+    const banner = upcoming ? `<a class="banner-link" href="#states">${t('أقرب فعالية: ' + upcoming.title)} · ${F.full.format(new Date(upcoming.starts))}${icon('arrowRight', { mirror: true })}</a>` : '';
+    empty = `<div class="cal-empty">${!inMonth.length ? `<h4>${t('لا فعاليات في هذا الشهر بعد')}</h4>` : `<h4>${t('انتهت فعاليات هذا الشهر')}</h4>`}${banner}
+      <form class="alert-form" onsubmit="event.preventDefault()"><div class="field"><label for="alert-email">${t('وصلني بالفعاليات القادمة على بريدي')}</label><input class="input" id="alert-email" type="email" dir="ltr" autocomplete="email" placeholder="name@example.com"></div><button class="btn btn-primary">${t('أبلغني')}</button></form></div>`;
+  }
+  document.getElementById('cal-empty').innerHTML = empty;
+
+  // desktop table
+  const cells = buildMonthGrid(month);
+  let rows = '';
+  for (let r = 0; r < cells.length / 7; r++) {
+    rows += '<tr>' + cells.slice(r * 7, r * 7 + 7).map((key, c) => {
+      const out = key.slice(0, 7) !== month, evs = byDay[key] || [];
+      const cls = [out ? 'out' : '', (c === 5 || c === 6) && !out ? 'weekend' : ''].filter(Boolean).join(' ');
+      const cur = key === todayKey ? ' aria-current="date"' : '';
+      const list = evs.map(e => { const s = calState(e); return `<li><a class="cal-ev s-${s}" href="#states"><span class="t">${F.time.format(new Date(e.starts))}</span><span class="n">${t(e.title)}</span>${badge(s) ? `<span class="b">${badge(s)}</span>` : ''}</a></li>`; }).join('');
+      return `<td class="${cls}"${cur}><span class="num">${dayNum(key)}</span>${list ? `<ul>${list}</ul>` : ''}</td>`;
+    }).join('') + '</tr>';
+  }
+  document.getElementById('cal-table').innerHTML = `<caption class="vh">${F.monthYear.format(monthDate(month))}</caption><thead><tr>${WEEKDAYS.map(w => `<th scope="col">${w}</th>`).join('')}</tr></thead><tbody>${rows}</tbody>`;
+
+  // mobile list
+  const days = Object.keys(byDay).sort();
+  document.getElementById('cal-list').innerHTML = days.map(key => {
+    const d = new Date(byDay[key][0].starts);
+    return `<section aria-label="${F.full.format(d)}"><h4 class="list-day${key === todayKey ? ' today' : ''}"><span class="fd">${dayNum(key)}</span><span class="wd">${F.weekday.format(d)}</span></h4><ul>${byDay[key].map(e => { const s = calState(e); return `<li><a class="list-ev s-${s}" href="#states"><span class="t">${timeRange(e.starts, e.ends)}</span><span class="n">${t(e.title)}</span>${badge(s) ? `<span class="b">${badge(s)}</span>` : ''}</a></li>`; }).join('')}</ul></section>`;
+  }).join('');
+}
+document.getElementById('prev').addEventListener('click', () => { const i = MONTHS.indexOf(month); if (i > 0) { month = MONTHS[i - 1]; renderCalendar(); } });
+document.getElementById('next').addEventListener('click', () => { const i = MONTHS.indexOf(month); if (i < MONTHS.length - 1) { month = MONTHS[i + 1]; renderCalendar(); } });
+
+/* ---------- header: departments disclosure + mobile menu ---------- */
+document.getElementById('dd-depts').innerHTML = DEPTS.map(d => `<li><a href="#">${t(d)}</a></li>`).join('');
+function disclosure(btnId, panelId) {
+  const b = document.getElementById(btnId), p = document.getElementById(panelId);
+  const set = open => { b.setAttribute('aria-expanded', open); p.hidden = !open; };
+  b.addEventListener('click', () => set(b.getAttribute('aria-expanded') !== 'true'));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && b.getAttribute('aria-expanded') === 'true') { set(false); b.focus(); } });
+  document.addEventListener('click', e => { if (!b.contains(e.target) && !p.contains(e.target)) set(false); });
+}
+disclosure('dd-btn', 'dd-depts'); disclosure('menu-btn', 'mnav');
+document.getElementById('foot-logo').innerHTML = document.querySelector('.logo svg').outerHTML.replace(/hhr/g, 'hhf');
+
+/* ---------- toolbar ---------- */
+document.getElementById('replay').addEventListener('click', () => { const b = document.getElementById('band'); b.classList.remove('settled'); b.innerHTML = ''; requestAnimationFrame(buildBands); });
+document.getElementById('rm').addEventListener('click', e => { const on = document.documentElement.classList.toggle('rm'); e.currentTarget.setAttribute('aria-pressed', on); });
+document.getElementById('clean').addEventListener('click', e => { const on = document.documentElement.classList.toggle('clean'); e.currentTarget.setAttribute('aria-pressed', on); });
+if (new URLSearchParams(location.search).has('rm')) { document.documentElement.classList.add('rm'); document.getElementById('rm').setAttribute('aria-pressed', 'true'); }
+if (new URLSearchParams(location.search).has('clean')) { document.documentElement.classList.add('clean'); document.getElementById('clean').setAttribute('aria-pressed', 'true'); }
+
+/* ---------- prototype checks ---------- */
+function lum(hex) { const c = hex.replace('#', ''); return [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4).reduce((a, v, i) => a + v * [0.2126, 0.7152, 0.0722][i], 0); }
+const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+function measure(text, css) { const s = document.createElement('span'); s.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;' + css; s.textContent = text; document.body.appendChild(s); const w = s.getBoundingClientRect().width; s.remove(); return w; }
+function runChecks() {
+  const out = [];
+  // 1. weights loaded
+  const faces = [...document.fonts].filter(f => f.family.replace(/"/g, '') === 'IBM Plex Sans Arabic' && f.status === 'loaded');
+  const weights = [...new Set(faces.map(f => f.weight))].sort();
+  out.push(`<div class="check"><h3>1 · Plex Arabic weights loaded</h3><p>${['400', '500', '600', '700'].map(w => `<span class="${weights.includes(w) ? 'pass' : 'fail'}">${w}</span>`).join(' · ')}</p>
+    <div class="spec-row ar">${[400, 500, 600, 700].map(w => `<span style="font-weight:${w};font-size:20px">حصن ${NUM.format(w)} — كل تخصص لبنة في حصن الوطن</span>`).join('')}</div>
+    <p>Without a 600 file, <code>font-weight:600</code> falls back to 700.</p></div>`);
+  // 2. digits + tnum
+  const tn = 'font-family:"IBM Plex Sans Arabic";font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;';
+  const pr = 'font-family:"IBM Plex Sans Arabic";font-size:40px;font-weight:700;';
+  const ws = s => ['١١١١١١', '٠٠٠٠٠٠', '٨٨٨٨٨٨'].map(x => measure(x, s).toFixed(1));
+  const wt = ws(tn), wp = ws(pr);
+  const tnumOK = new Set(wt).size === 1, propDiff = new Set(wp).size > 1;
+  out.push(`<div class="check"><h3>2 · Arabic-Indic digits, tabular figures</h3>
+    <table><tr><th></th><th>١١١١١١</th><th>٠٠٠٠٠٠</th><th>٨٨٨٨٨٨</th></tr><tr><td>tabular-nums</td>${wt.map(w => `<td>${w}px</td>`).join('')}</tr><tr><td>default</td>${wp.map(w => `<td>${w}px</td>`).join('')}</tr></table>
+    <p>tnum for Arabic-Indic digits: <span class="${tnumOK ? 'pass' : 'fail'}">${tnumOK ? 'supported (equal widths)' : 'NOT supported — digits stay proportional'}</span>${propDiff ? '' : ' · default digits are already equal width'}.</p>
+    <p>Confirmed in the font file (Google Fonts v15): no <code>tnum</code> feature; advances range 263–630 units (١ narrowest, ٣ widest). Fix: put changing or aligned figures (day numbers, seat counts, times in columns) in fixed-width boxes; never rely on <code>tabular-nums</code>.</p></div>`);
+  // 3. Latin glyphs
+  const sample = 'Hisn SUAS 2026 · Software Engineering';
+  const rows = [400, 600, 700].map(w => { const a = measure(sample, `font-family:"IBM Plex Sans Arabic";font-size:16px;font-weight:${w}`), b = measure(sample, `font-family:"IBM Plex Sans";font-size:16px;font-weight:${w}`); return [w, a, b, ((a - b) / b * 100)]; });
+  const maxDiff = Math.max(...rows.map(r => Math.abs(r[3])));
+  out.push(`<div class="check"><h3>3 · Plex Arabic's Latin vs IBM Plex Sans</h3>
+    <div class="spec-row"><span style="font-family:'IBM Plex Sans Arabic';font-size:22px">${sample} <small>(Plex Arabic)</small></span><span style="font-family:'IBM Plex Sans';font-size:22px">${sample} <small>(Plex Sans)</small></span></div>
+    <table><tr><th>weight</th><th>Plex Arabic</th><th>Plex Sans</th><th>diff</th></tr>${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1].toFixed(1)}px</td><td>${r[2].toFixed(1)}px</td><td>${r[3].toFixed(2)}%</td></tr>`).join('')}</table>
+    <p>Verdict: <span class="${maxDiff < 1 ? 'pass' : 'warnc'}">${maxDiff < 1 ? 'same metrics — one family is enough for inline English' : 'metrics differ — compare by eye before dropping IBM Plex Sans'}</span></p></div>`);
+  // 4. Intl output
+  const s = '2026-11-18T15:00:00Z', e2 = '2026-11-18T17:00:00Z';
+  const latn = new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { timeZone: TZ, hour: 'numeric', minute: '2-digit' }).format(new Date(s));
+  out.push(`<div class="check"><h3>4 · Intl output for the D1-7 change</h3><table>
+    <tr><td>date (nu-arab)</td><td class="ar">${dtf({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(s))}</td></tr>
+    <tr><td>time (nu-arab)</td><td class="ar">${F.time.format(new Date(s))}</td></tr>
+    <tr><td>time (today's nu-latn)</td><td class="ar">${latn}</td></tr>
+    <tr><td>range</td><td class="ar">${timeRange(s, e2)}</td></tr>
+    <tr><td>percent</td><td class="ar">${new Intl.NumberFormat(LOC, { style: 'percent', maximumFractionDigits: 2 }).format(0.2489)}</td></tr>
+    <tr><td>riyadhDateKey</td><td>${dateKey('2026-11-30T21:30:00Z')} <span class="pass">(stays Latin)</span></td></tr>
+    <tr><td>no Hijri leak</td><td><span class="${!/١٤٤٨|1448/.test(dtf({ year: 'numeric' }).format(new Date(s))) ? 'pass' : 'fail'}">${dtf({ year: 'numeric' }).format(new Date(s))}</span></td></tr></table></div>`);
+  // 5. plurals
+  out.push(`<div class="check"><h3>5 · Arabic plurals for seats.left (G-8)</h3><table>${[0, 1, 2, 3, 10, 11, 12, 99, 100].map(n => `<tr><td>${n}</td><td>${PR.select(n)}</td><td class="ar">${seatsText(n)}</td></tr>`).join('')}</table>
+    <p>Today's single string «تبقّى {n} مقعدًا» is only right for the <code>many</code> row (11–99).</p></div>`);
+  // 6. contrast
+  const pairs = [['body text', '#022C33', '#F7FAF9', 4.5], ['heading (teal)', '#03606D', '#F7FAF9', 4.5], ['muted (deep-400)', '#416166', '#F7FAF9', 4.5], ['muted on box', '#416166', '#EDF4F2', 4.5], ['dept label (green-700)', '#0A644F', '#FFFFFF', 4.5], ['primary button', '#FFFFFF', '#03606D', 4.5], ['section number (white on green, 19px bold = large)', '#FFFFFF', '#0E8B6B', 3], ['hero lede (teal-100 on mid)', '#DCE9EB', '#04424C', 4.5], ['hero lede (teal-100 on teal, worst case)', '#DCE9EB', '#03606D', 4.5], ['accent word (mint on mid, display)', '#5FD4AA', '#04424C', 3], ['next-brick label (mint-200 on mid)', '#CFF2E6', '#04424C', 4.5], ['warning tag', '#8A5A00', '#FBF3E1', 4.5], ['danger tag', '#B42318', '#FCEEEC', 4.5], ['input border (teal-400) — 3:1 non-text', '#428892', '#FFFFFF', 3], ['focus ring on light (teal)', '#03606D', '#F7FAF9', 3], ['focus ring on dark (mint)', '#5FD4AA', '#022C33', 3], ['out-of-month day (deep-400 on page)', '#416166', '#F7FAF9', 4.5]];
+  out.push(`<div class="check" style="grid-column:1/-1"><h3>6 · Contrast of every pair on this page</h3><table><tr><th>use</th><th>fg / bg</th><th>ratio</th><th>needs</th><th></th></tr>${pairs.map(([n, f, b, need]) => { const r = ratio(f, b); return `<tr><td>${n}</td><td><span class="swatch" style="background:${f}"></span> ${f} / <span class="swatch" style="background:${b}"></span> ${b}</td><td>${r.toFixed(2)}</td><td>${need}</td><td class="${r >= need ? 'pass' : 'fail'}">${r >= need ? 'pass' : 'FAIL'}</td></tr>`; }).join('')}</table></div>`);
+  const nSq = document.querySelectorAll('#band span').length, stg = parseFloat(document.getElementById('band').style.getPropertyValue('--stagger')) || 30;
+  out.push(`<div class="check" style="grid-column:1/-1"><h3>7 · Motion</h3><p>System prefers-reduced-motion: <b>${matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduce' : 'no-preference'}</b>. Band: ${nSq} squares × ${stg.toFixed(1)} ms stagger + 180 ms = ${Math.round((nSq - 1) * stg + 180)} ms (after a 200 ms delay). Only <code>transform</code> and <code>opacity</code> animate; colour changes on hover are instant. The H1 (LCP) never animates.</p></div>`);
+  document.getElementById('checks').innerHTML = out.join('');
+}
+
+/* ---------- boot ---------- */
+renderNext(); buildBands(); renderCards(); renderSheet(); renderCalendar();
+document.fonts.ready.then(() => { runChecks(); const de = document.documentElement; document.body.dataset.h = de.scrollHeight; document.body.dataset.overflow = de.scrollWidth > de.clientWidth ? 'yes' : 'no';
+  if (location.search.includes('debug')) document.body.dataset.offenders = [...document.querySelectorAll('body *')].filter(el => { const r = el.getBoundingClientRect(); return r.width && (r.left < -1 || r.right > de.clientWidth + 1) && !el.closest('.band,.band-top,.vh'); }).slice(0, 8).map(el => el.tagName + '.' + el.className.toString().split(' ')[0] + ':' + Math.round(el.getBoundingClientRect().left)).join(' | '); });
+// Resize: rebuild only if the square count changes, and never replay the lay-in (it is a load-only moment).
+let rw; addEventListener('resize', () => { clearTimeout(rw); rw = setTimeout(() => {
+  const sq = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sq'));
+  if (Math.ceil(window.innerWidth / (sq * 2)) + 1 === document.querySelectorAll('#band span').length) return;
+  document.getElementById('band').classList.add('settled'); buildBands();
+}, 200); });
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # Hisn (حصن) website: discovery and design direction
 
-**Status:** proposal for review · **Date:** Sat 14 Nov 2026 · **Author:** frontend (Abdulrahman), with Claude
-**Decision needed:** pick Direction A or B (§7), and answer the questions in §10.
+**Status:** Direction A «لبنة» approved (Sat 14 Nov) · prototype in [`prototype/`](../prototype/README.md) · **Date:** Sat 14 Nov 2026 · **Author:** frontend (Abdulrahman), with Claude
+**Decision needed:** answers to the questions in §10.
 
 **Source tags used throughout**
 
@@ -39,7 +39,8 @@
   - Specializations and Hisnathon fit as static pages, with no database.
   - Both new pages ship only if final content arrives by **Fri 27 Nov, 12:00**.
 - **Missing:** the spec and plan files. The teaser's stylesheet was found on the live site.
-- **Needed from you:** a direction (A or B) and answers to Q1–Q5. Defaults apply from Mon 16 Nov, 12:00.
+- **Direction A was approved on 14 Nov**, and the prototype is in `prototype/`.
+- **Still needed:** answers to Q1–Q5. Defaults apply from Mon 16 Nov, 12:00.
 
 ---
 
@@ -219,7 +220,7 @@ From the guide's table `[G p.14]`, checked against my own WCAG calculations.
 #### 1. Numerals
 **Sources disagree:** The guide says Arabic-Indic digits in Arabic material, as a *fixed* rule `[G p.3, p.17]`. D1-7 sets `RIYADH_LOCALE = 'ar-SA-u-ca-gregory-nu-latn'`, and its tests expect '6:00', '18' and '2026' `[D D1-7]`.
 
-**Effect on the design:** It touches every date, time, seat count, waitlist position and figure. The calendar needs tabular digits; I'll verify that Plex Arabic supports `tnum` in the prototype.
+**Effect on the design:** It touches every date, time, seat count, waitlist position and figure. The prototype found that Plex Arabic has **no `tnum`** for Eastern Arabic digits (they're proportional), so figures that change or line up go in fixed-width boxes.
 
 **Effect on the schedule:** About 3 hours:
 - Change the locale to `nu-arab` and update 3 tests in D1-7.
@@ -265,7 +266,7 @@ Abdullah's email templates should use the same helpers.
 
 **Effect on the design:** With no 600 file, the browser renders `font-semibold` as 700, which silently departs from the brand.
 
-**Effect on the schedule:** 5 minutes, plus one font file per subset (**Assumption:** about 25–35 KB of woff2; I'll measure it in the build).
+**Effect on the schedule:** 5 minutes, plus one font file: the Arabic subset is 33.6 KB of woff2 (measured on Google Fonts v15).
 
 **Recommendation:** Add 600, and preload only the Arabic subset (see §8).
 
@@ -400,7 +401,7 @@ The alert list has no page of its own. It's a form that appears in the footer, o
 - Light-first, following the 60 / 25 / 10 / 5 split.
 - Square corners.
 - Text-led hero with no photo, because `HERO_IMAGE = null` `[D D1-8]`.
-- Plex Sans Arabic only. **Assumption:** its Latin glyphs match IBM Plex Sans; to verify in the prototype.
+- Plex Sans Arabic only. The prototype confirmed its Latin glyphs match IBM Plex Sans (0.00–0.03% width difference).
 - Arabic-Indic numerals (pending Q1).
 - Motion uses transform and opacity only.
 
@@ -649,7 +650,8 @@ No parallax, no scroll-linked animation, no springs.
 
 - **Fonts:** `IBM_Plex_Sans_Arabic`, weights `['400','500','600','700']`, `display: 'swap'`, CSS variable `--font-plex`.
   - **Assumption, to verify:** preload only the Arabic subset, with Latin loading on demand by `unicode-range`.
-  - No separate IBM Plex Sans until English pages exist, provided the prototype confirms that Plex Arabic's Latin glyphs match.
+  - No separate IBM Plex Sans until English pages exist; the prototype confirmed Plex Arabic's Latin glyphs match.
+  - Measured: about 33.5 KB of woff2 per weight for the Arabic subset, so four weights come to about 134 KB.
 - The glow position follows the guide's cover (upper area, on the end side).
 
 ### Components
@@ -905,6 +907,8 @@ The programs committee fills a three-column sheet: major · work area · job tit
 **Never cut:** every dev-1 function, all register states, accessibility, attendance marking (if Q2 says yes), the outlined logo.
 
 ### First step after you choose a direction
+**Done (Sat 14 Nov):** see [`prototype/README.md`](../prototype/README.md) for the screens and the results of the checks.
+
 A **throwaway HTML prototype**, `prototype/index.html` in this design repo, plain HTML and CSS with the real tokens, timeboxed to about 5 hours on Sun 15:
 1. The hero with the band animation.
 2. An EventCard and a RegisterButton showing all 8 states, with a toggle.
@@ -933,4 +937,4 @@ These change the direction or the scope. Each has the default I'll use if nobody
 | Q4 | Are the programs committee's "work areas" the same as the six departments? | Programs committee | Separate lists; an area links to a department page only where one matches |
 | Q5 | Is English needed at launch? | Committee | **No:** Arabic only; tokens and `t()` stay ready for `en.json` later |
 
-**Then I'll stop and wait for your choice of direction (A or B).**
+**Direction A was chosen on Sat 14 Nov.** Next: review the prototype, then the D1-5 PR (tokens, base components, brand elements).

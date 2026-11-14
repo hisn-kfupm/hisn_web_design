@@ -4,7 +4,8 @@ Design workspace for the Hisn (حصن) website, Phase 2: discovery, direction an
 
 | Path | What it is |
 |---|---|
-| `design/01-discovery.md` | Discovery and two visual directions (start here) |
+| `design/01-discovery.md` | Discovery and two visual directions (start here); Direction A «لبنة» chosen |
+| `prototype/` | Throwaway HTML prototype of Direction A, with screenshots and check results |
 | `hisn-redesign-prompt.md` | The design brief |
 | `dev-1.md` | Frontend task list (D1-1 to D1-17) |
 | `دليل الهوية البصرية - لجنة الدعم الفني.pdf` | Brand guide, part 1 (Arabic, 20 pages) |
