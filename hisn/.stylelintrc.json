@@ -1,7 +1,16 @@
 {
   "ignoreFiles": ["node_modules/**", ".next/**"],
   "rules": {
-    "property-disallowed-list": ["margin-left", "margin-right", "padding-left", "padding-right", "left", "right", "border-left", "border-right"],
-    "declaration-property-value-disallowed-list": { "text-align": ["left", "right"], "float": ["left", "right"] }
+    "property-disallowed-list": [
+      "margin-left", "margin-right", "padding-left", "padding-right", "left", "right", "border-left", "border-right",
+      "/^border-(left|right)-/",
+      "/^border-(top|bottom)-(left|right)-radius$/",
+      "/^scroll-(margin|padding)-(left|right)$/"
+    ],
+    "declaration-property-value-disallowed-list": {
+      "text-align": ["left", "right"],
+      "float": ["left", "right"],
+      "clear": ["left", "right"]
+    }
   }
 }
