@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+/*
+  Hisn design tokens — values from the brand kit (04-web/tokens/tokens.css), roles from the
+  brand guide (pp. 11–16). Semantic names follow dev-1 D1-1 so teammates' classes keep working.
+  Light only at launch: no dark-mode block (discovery §5 #3).
+*/
+@theme {
+  /* Tailwind's own palette is removed so off-brand colours can't be used by accident. */
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-deep-50: #F0F2F3;  --color-deep-100: #DCE1E2;  --color-deep-200: #B3C0C2;  --color-deep-300: #819699;  --color-deep-400: #416166;
+  --color-deep-500: #022C33; --color-deep-600: #02272D;  --color-deep-700: #012227;  --color-deep-800: #011D21;  --color-deep-900: #01181C;
+  --color-mid-50: #F0F4F4;   --color-mid-100: #DCE5E6;   --color-mid-200: #B4C6C9;   --color-mid-300: #82A1A6;   --color-mid-400: #437179;
+  --color-mid-500: #04424C;  --color-mid-600: #033A42;   --color-mid-700: #033139;   --color-mid-800: #02292F;   --color-mid-900: #022026;
+  --color-teal-50: #F0F5F6;  --color-teal-100: #DCE9EB;  --color-teal-200: #B3CFD3;  --color-teal-300: #81B0B6;  --color-teal-400: #428892;
+  --color-teal-500: #03606D; --color-teal-600: #03535E;  --color-teal-700: #024650;  --color-teal-800: #023941;  --color-teal-900: #012C33;
+  --color-green-50: #F1F8F6; --color-green-100: #DDEFEA; --color-green-200: #B7DCD3; --color-green-300: #87C5B5; --color-green-400: #4AA890;
+  --color-green-500: #0E8B6B; --color-green-600: #0C785D; --color-green-700: #0A644F; --color-green-800: #085140; --color-green-900: #063E32;
+  --color-mint-50: #F5FCFA;  --color-mint-100: #E9F9F3;  --color-mint-200: #CFF2E6;  --color-mint-300: #AFEAD5;  --color-mint-400: #87DFBF;
+  --color-mint-500: #5FD4AA; --color-mint-600: #51B692;  --color-mint-700: #43977B;  --color-mint-800: #347963;  --color-mint-900: #265B4B;
+
+  /* core names (guide p.11) */
+  --color-deep: #022C33;
+  --color-mid: #04424C;
+  --color-teal: #03606D;
+  --color-green: #0E8B6B;
+  --color-mint: #5FD4AA;
+  --color-box: #EDF4F2;
+  --color-page: #F7FAF9;
+
+  /* semantic — dev-1 D1-1 names; values from the kit */
+  --color-bg: #F7FAF9;
+  --color-surface: #EDF4F2;
+  --color-primary: #03606D;
+  --color-accent: #5FD4AA;          /* DECORATIVE ONLY: lines, glows, marks. Never text on light (1.7:1). */
+  --color-accent-strong: #0A644F;   /* green text at any size (6.8:1 on page) */
+  --color-text: #022C33;
+  --color-heading: #03606D;
+  --color-muted: #416166;           /* 6.4:1 on page */
+  --color-line: #DCE1E2;            /* decorative dividers */
+  --color-field: #428892;           /* input borders, 3.9:1 (WCAG 1.4.11) */
+  --color-on-dark: #DCE9EB;         /* secondary text on deep/mid/teal (≥5.8:1) */
+  /* not in the guide — flagged for the brand owner (discovery G-7) */
+  --color-danger: #B42318;
+  --color-danger-bg: #FCEEEC;
+  --color-warning: #8A5A00;
+  --color-warning-bg: #FBF3E1;
+  --color-success: #0A644F;
+
+  /* type scale (guide p.16); mobile floors are an assumption (discovery §3) */
+  --text-display: clamp(2.5rem, 1.9rem + 2.4vw, 3.5rem);
+  --text-display--line-height: 1.25;
+  --text-display--font-weight: 700;
+  --text-h1: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem);
+  --text-h1--line-height: 1.35;
+  --text-h1--font-weight: 700;
+  --text-h2: clamp(1.375rem, 1.2rem + 0.7vw, 1.75rem);
+  --text-h2--line-height: 1.4;
+  --text-h2--font-weight: 700;
+  --text-h3: clamp(1.125rem, 1.08rem + 0.2vw, 1.25rem);
+  --text-h3--line-height: 1.5;
+  --text-h3--font-weight: 600;
+  --text-body: 1rem;
+  --text-body--line-height: 1.7;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.65;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.4;
+  --text-label--font-weight: 600;
+  --text-figure: clamp(3rem, 2.2rem + 3.2vw, 4.5rem);
+  --text-figure--line-height: 1.1;
+  --text-figure--font-weight: 700;
+
+  /* square brand: no rounded corners except true circles */
+  --radius-*: initial;
+  --radius-none: 0;
+  --radius-full: 9999px;
+
+  /* motion (discovery §8): transform and opacity only */
+  --ease-brand: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  --animate-rise: rise 180ms var(--ease-brand) both;
+  @keyframes rise {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+}
+
+/* next/font sets --font-plex on <html>; `inline` makes utilities read it directly. */
+@theme inline {
+  --font-sans: var(--font-plex), system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  --header-h: 80px;
+  --plate-h: 960px;   /* one gradient canvas shared by the header and the page head, so they read as one plate */
+  --sq: 16px;         /* battlement square */
+  --dir: -1;          /* RTL: "forward" motion runs toward inline-end, i.e. negative X */
+}
+@media (min-width: 48rem) {
+  :root { --sq: 24px; }
+}
+@media (min-width: 64rem) {
+  :root { --header-h: 84px; }
+}
+
+/* official gradient (guide p.13): 120°, teal → mid → deep, with a 22% mint glow */
+@utility bg-brand {
+  background-color: var(--color-deep);
+  background-image:
+    radial-gradient(60% 70% at 25% 18%, rgb(95 212 170 / 0.22), transparent 60%),
+    linear-gradient(120deg, #03606D 0%, #04424C 50%, #022C33 100%);
+  background-repeat: no-repeat;
+  background-size: 100% var(--plate-h);
+}
+/* the mint–teal hairline across the top of every page; mint sits at the RTL start (right) */
+@utility hairline {
+  background-image: linear-gradient(to left, #5FD4AA, #03606D);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 1.5rem;
+  }
+  body {
+    background-color: var(--color-page);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+  /* visible focus everywhere: teal on light (6.9:1), mint on dark (8.1:1) */
+  :focus-visible {
+    outline: 3px solid var(--color-teal);
+    outline-offset: 2px;
+  }
+  .on-dark :focus-visible {
+    outline-color: var(--color-mint);
+  }
+  ::selection {
+    background-color: var(--color-mint-200);
+    color: var(--color-deep);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* page container: 1200 px max, 20 px side margin on phones, 32 px from 640 px */
+@utility wrap {
+  inline-size: min(1200px, 100% - 40px);
+  margin-inline: auto;
+  @media (min-width: 40rem) {
+    inline-size: min(1200px, 100% - 64px);
+  }
+}
