@@ -19,7 +19,8 @@ describe('t()', () => {
     for (const dir of ['app', 'components', 'lib']) {
       for (const file of files(dir)) {
         const src = readFileSync(file, 'utf8')
-        for (const m of src.matchAll(/t\(\s*'([^']+)'/g)) used.add(m[1])
+        // \b so calls that merely end in t, such as DateTimeFormat('en-CA'), don't count
+        for (const m of src.matchAll(/\bt\(\s*'([^']+)'/g)) used.add(m[1])
         for (const m of src.matchAll(/labelKey:\s*'([^']+)'/g)) used.add(m[1])
       }
     }
