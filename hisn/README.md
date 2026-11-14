@@ -2,6 +2,8 @@
 
 Next.js 16 (App Router, Turbopack, Cache Components) · TypeScript · Tailwind CSS v4 (tokens in `app/globals.css` `@theme`) · Vitest · Playwright.
 
+Node 24 (`.nvmrc`). Every pull request runs `../.github/workflows/pr.yml`: `npm ci`, lint, typecheck, unit tests and build must pass; `check:content` lists the «مؤقت» strings left but doesn't fail the run yet.
+
 Design direction and decisions: [`../design/01-discovery.md`](../design/01-discovery.md) (Direction A «لبنة»). Task list: [`../dev-1.md`](../dev-1.md).
 
 | Script | What it does |
