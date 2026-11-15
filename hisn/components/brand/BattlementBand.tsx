@@ -1,8 +1,9 @@
 import { cn } from '@/lib/cn'
 
 type Props = {
-  /** 'page': light squares rising into a dark plate (the top of the wall) · 'deep': dark squares rising into the page */
-  tone?: 'page' | 'deep'
+  /** 'page': light squares rising into a dark plate (the top of the wall) · 'deep': dark squares rising into the page ·
+      'deep-700': the verbs band's tone rising into the hero, so the hero's wall ends in the next band's crenellated top */
+  tone?: 'page' | 'deep' | 'deep-700'
   /** which edge of the parent the band sits on; the parent must be `relative` */
   edge?: 'bottom' | 'top'
   /** signature 2: lay the squares in on load (CSS only; static under reduced motion) */
@@ -29,7 +30,7 @@ export function BattlementBand({ tone = 'page', edge = 'bottom', animate = false
         <span
           key={i}
           style={animate ? { animationDelay: `${200 + i * 25}ms` } : undefined}
-          className={cn('size-(--sq) shrink-0 origin-bottom', tone === 'page' ? 'bg-page' : 'bg-deep', animate && 'animate-rise')}
+          className={cn('size-(--sq) shrink-0 origin-bottom', { page: 'bg-page', deep: 'bg-deep', 'deep-700': 'bg-deep-700' }[tone], animate && 'animate-rise')}
         />
       ))}
     </div>

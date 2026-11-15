@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, Ban, Check, Clock, MapPin, Play, Video } from 'lucide-react'
-import { Bdi } from '@/components/Bdi'
+import { Place } from '@/components/Place'
 import { EventImage } from '@/components/EventImage'
 import { Icon } from '@/components/ui/Icon'
 import { Tag } from '@/components/ui/Tag'
@@ -65,7 +65,7 @@ export function EventCard({ event, variant }: Props) {
             {(online || event.location) && (
               <li className="flex items-center gap-2">
                 <Icon icon={online ? Video : MapPin} size={16} />
-                <span>{online ? t('event.format.online') : <Bdi>{event.location}</Bdi>}</span>
+                <span>{online ? t('event.format.online') : <Place text={event.location ?? ''} />}</span>
               </li>
             )}
           </ul>

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
-import { getPublicEvent, latestRecordings, PUBLIC_EVENT_COLUMNS, toPublicEvent, upcomingEvents } from '@/lib/events/queries'
+import { eventsInMonth, getPublicEvent, latestRecordings, PUBLIC_EVENT_COLUMNS, toPublicEvent, upcomingEvents } from '@/lib/events/queries'
+import { monthRangeUtc } from '@/lib/events/month'
 import { STAND_IN_IDS } from '@/lib/events/stand-in'
 import { departments } from '@/lib/data/labels'
 
@@ -92,6 +93,43 @@ describe('getPublicEvent', () => {
 
   it('returns null for an unknown id', async () => {
     expect(await getPublicEvent(999_999)).toBeNull()
+  })
+})
+
+describe('eventsInMonth', () => {
+  it('returns published and cancelled events that start inside the Riyadh month, earliest first', async () => {
+    const events = await eventsInMonth('2026-11')
+    expect(events.length).toBeGreaterThan(0)
+    const { from, to } = monthRangeUtc('2026-11')
+    for (const e of events) {
+      expect(['published', 'cancelled']).toContain(e.status)
+      expect(Date.parse(e.startsAt)).toBeGreaterThanOrEqual(Date.parse(from))
+      expect(Date.parse(e.startsAt)).toBeLessThan(Date.parse(to))
+    }
+    const starts = events.map((e) => Date.parse(e.startsAt))
+    expect(starts).toEqual([...starts].sort((a, b) => a - b))
+  })
+
+  it('includes cancelled events and past ones, never drafts', async () => {
+    const ids = (await eventsInMonth('2026-11')).map((e) => e.id)
+    expect(ids).toContain(STAND_IN_IDS.cancelled)
+    expect(ids).toContain(STAND_IN_IDS.pastWithRecording)
+    expect(ids).toContain(STAND_IN_IDS.pastNoRecording)
+    expect(ids).not.toContain(STAND_IN_IDS.draft)
+  })
+
+  it('gives the next month its own events and an empty array for a month without any', async () => {
+    const dec = await eventsInMonth('2026-12')
+    expect(dec.length).toBeGreaterThan(0)
+    for (const e of dec) expect(e.startsAt >= monthRangeUtc('2026-12').from).toBe(true)
+    expect(await eventsInMonth('2020-01')).toEqual([])
+  })
+
+  it('never exposes the meeting link', async () => {
+    for (const e of await eventsInMonth('2026-11')) {
+      expect(Object.keys(e)).not.toContain('meetingUrl')
+      expect(Object.keys(e)).not.toContain('meeting_url')
+    }
   })
 })
 

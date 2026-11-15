@@ -1,11 +1,10 @@
 /**
  * Times are stored in UTC and shown in Riyadh time (Asia/Riyadh, UTC+3 all year).
  *
- * Digits: Latin, as dev-1 D1-7 specifies. The brand guide asks for Arabic-Indic digits (٠١٢٣);
- * that is open question Q1 in design/01-discovery.md. If it is accepted, change `nu-latn` to
- * `nu-arab` here and update the digit expectations in tests/unit/riyadh.test.ts.
+ * Digits: Eastern Arabic (٠١٢٣), as the brand guide requires (redesign, 15 Nov 2026; this settles
+ * open question Q1 of design/01-discovery.md). `riyadhDateKey` stays Latin: it is a machine key.
  */
-export const RIYADH_LOCALE = 'ar-SA-u-ca-gregory-nu-latn' // Gregorian calendar, Latin digits
+export const RIYADH_LOCALE = 'ar-SA-u-ca-gregory-nu-arab' // Gregorian calendar, Eastern Arabic digits
 
 const TIME_ZONE = 'Asia/Riyadh'
 
@@ -51,12 +50,12 @@ export function riyadhMonth(utcIso: string): string {
   return riyadhDateKey(utcIso).slice(0, 7)
 }
 
-/** for display: «18 نوفمبر 2026», «6:00 م», both, or one part («18», «نوفمبر», «الأربعاء», «نوفمبر 2026») */
+/** for display: «١٨ نوفمبر ٢٠٢٦», «٦:٠٠ م», both, or one part («١٨», «نوفمبر», «الأربعاء», «نوفمبر ٢٠٢٦») */
 export function formatRiyadh(utcIso: string, style: Style): string {
   return formatFor(style).format(new Date(utcIso))
 }
 
-/** start–end clock times in Riyadh: «6:00–8:00 م», or «9:00 ص – 8:00 م» when the periods differ */
+/** start–end clock times in Riyadh: «٦:٠٠–٨:٠٠ م», or «٩:٠٠ ص – ٨:٠٠ م» when the periods differ */
 export function formatRiyadhTimeRange(startIso: string, endIso: string): string {
   return formatFor('time').formatRange(new Date(startIso), new Date(endIso))
 }

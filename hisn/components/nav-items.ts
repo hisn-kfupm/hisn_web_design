@@ -1,7 +1,8 @@
 import { departments } from '@/lib/data/labels'
 import { t, type StringKey } from '@/lib/i18n/t'
 
-export type NavItem = { href: string; label: string }
+/** `code` is set on department items, so menus can show the department's icon */
+export type NavItem = { href: string; label: string; code?: string }
 
 /** Header links (dev-1 D1-5), resolved to Arabic on the server. */
 export function primaryNav(): NavItem[] {
@@ -13,5 +14,5 @@ export function primaryNav(): NavItem[] {
 }
 
 export function departmentNav(): NavItem[] {
-  return departments.map((d) => ({ href: `/departments/${d.slug}`, label: t(`dept.${d.code}.title` as StringKey) }))
+  return departments.map((d) => ({ href: `/departments/${d.slug}`, label: t(`dept.${d.code}.title` as StringKey), code: d.code }))
 }

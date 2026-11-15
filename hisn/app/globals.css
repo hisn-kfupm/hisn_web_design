@@ -81,9 +81,23 @@
   --radius-none: 0;
   --radius-full: 9999px;
 
-  /* motion (discovery §8): transform and opacity only */
+  /* redesign display sizes (02-redesign §2): fluid far past the guide's 56 px */
+  --text-hero: clamp(3.375rem, 0.55rem + 8.1vw, 8.25rem);
+  --text-hero--line-height: 1.16;
+  --text-hero--font-weight: 700;
+  --text-kinetic: clamp(3.5rem, 0.5rem + 11vw, 12vw);
+  --text-kinetic--line-height: 1.15;
+  --text-kinetic--font-weight: 700;
+  --text-mega: clamp(2.25rem, 0.9rem + 5.6vw, 6.5rem);
+  --text-mega--line-height: 1.22;
+  --text-mega--font-weight: 700;
+
+  /* motion (02-redesign §4): transform, opacity, clip-path. Same curves as lib/motion/eases.ts */
   --ease-brand: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-settle: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  /* brick-drop: a fast fall that lands at 58% and rebounds once */
+  --ease-drop: linear(0, 0.04 10%, 0.16 22%, 0.38 36%, 0.7 48%, 1 58%, 0.955 67%, 0.94 71%, 0.96 76%, 1 86%, 0.993 93%, 1);
 
   --animate-rise: rise 180ms var(--ease-brand) both;
   @keyframes rise {
@@ -103,12 +117,18 @@
   --plate-h: 960px;   /* one gradient canvas shared by the header and the page head, so they read as one plate */
   --sq: 16px;         /* battlement square */
   --dir: -1;          /* RTL: "forward" motion runs toward inline-end, i.e. negative X */
+  --start: 100%;      /* the inline-start edge as a transform-origin x (RTL: the right edge) */
+  --course: 30px;     /* height of one course of the hero wall; the canvas reads it */
+}
+[dir="ltr"] {
+  --dir: 1;
+  --start: 0%;
 }
 @media (min-width: 48rem) {
-  :root { --sq: 24px; }
+  :root { --sq: 24px; --course: 36px; }
 }
 @media (min-width: 64rem) {
-  :root { --header-h: 84px; }
+  :root { --header-h: 84px; --course: 40px; }
 }
 
 /* official gradient (guide p.13): 120°, teal → mid → deep, with a 22% mint glow */
@@ -128,7 +148,7 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-padding-top: 1.5rem;
+    scroll-padding-top: calc(var(--header-h) + 1rem);
   }
   body {
     background-color: var(--color-page);
@@ -167,4 +187,692 @@
   @media (min-width: 40rem) {
     inline-size: min(1200px, 100% - 64px);
   }
+}
+
+/* ───────────────────────── redesign system (02-redesign §4) ───────────────────────── */
+
+/* Lenis (smooth scroll) — its required rules, inlined so no extra stylesheet loads */
+html.lenis, html.lenis body { block-size: auto; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* grain: a very subtle noise layer for dark bands (render <Grain/> inside a `relative` band) */
+@utility grain-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* dark band: white text, mint focus. Every page head carries data-band="dark" for the header. */
+@utility band-dark {
+  background-color: var(--color-deep);
+  color: var(--color-white);
+}
+
+/* the page lifts off the fixed footer (FooterCurtain sets data-curtain and --footer-h) */
+.curtain-page {
+  position: relative;
+  z-index: 1;
+  background-color: var(--color-page);
+}
+[data-curtain="on"] .curtain-page {
+  margin-block-end: var(--footer-h, 0px);
+  box-shadow: 0 24px 48px -24px rgb(1 24 28 / 0.55);
+}
+[data-curtain="on"] .curtain-footer {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+/* the hairline as the scroll-progress bar: grows from the inline-start with page scroll */
+.progress-hairline {
+  transform-origin: var(--start) 50%;
+  transform: scaleX(var(--progress, 0));
+}
+@supports (animation-timeline: scroll()) {
+  .progress-hairline {
+    animation: progress-grow linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+@keyframes progress-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@layer components {
+  /* Button: a fill wipes in from the inline-start on hover; 1 px press. Colours come from the
+     tone/variant classes below (see components/ui/button.ts). */
+  .btn {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    white-space: nowrap;
+    border: 1.5px solid var(--btn-line, transparent);
+    background-color: var(--btn-bg, transparent);
+    color: var(--btn-fg);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.34s var(--ease-settle), border-color 0.34s var(--ease-settle), transform 75ms linear;
+  }
+  .btn::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    z-index: -1;
+    background-color: var(--btn-wipe);
+    transform: scaleX(0);
+    transform-origin: var(--start) 50%;
+    transition: transform 0.46s var(--ease-settle);
+  }
+  .btn:hover::before,
+  .btn:focus-visible::before,
+  .btn[aria-expanded="true"]::before {
+    transform: scaleX(1);
+  }
+  .btn:hover,
+  .btn:focus-visible,
+  .btn[aria-expanded="true"] {
+    color: var(--btn-wipe-fg);
+    border-color: var(--btn-wipe-line, var(--btn-line, transparent));
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { cursor: progress; opacity: 0.8; }
+
+  .btn-light-primary { --btn-bg: var(--color-teal); --btn-fg: #fff; --btn-wipe: var(--color-deep); --btn-wipe-fg: #fff; }
+  .btn-light-secondary { --btn-line: var(--color-teal); --btn-fg: var(--color-teal); --btn-wipe: var(--color-teal); --btn-wipe-fg: #fff; }
+  .btn-dark-primary { --btn-bg: var(--color-page); --btn-fg: var(--color-deep); --btn-wipe: var(--color-mint); --btn-wipe-fg: var(--color-deep); }
+  .btn-dark-secondary { --btn-line: rgb(220 233 235 / 0.6); --btn-fg: #fff; --btn-wipe: var(--color-page); --btn-wipe-fg: var(--color-deep); --btn-wipe-line: var(--color-page); }
+
+  /* arrows nudge forward (toward the inline-end) when their link or button is hovered */
+  .nudge { transition: transform 0.38s var(--ease-settle); }
+  :is(a, button, .group):hover > .nudge,
+  :is(a, button, .group):focus-visible > .nudge,
+  .group:hover .nudge {
+    transform: translateX(calc(var(--dir) * 5px));
+  }
+
+  /* underline that draws from the inline-start */
+  .draw-line {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-size: 0% 1.5px;
+    background-position: var(--start) 100%;
+    transition: background-size 0.42s var(--ease-settle);
+    text-decoration: none;
+  }
+  :is(a, button):hover .draw-line,
+  :is(a, button):focus-visible .draw-line,
+  a.draw-line:hover,
+  a.draw-line:focus-visible,
+  .draw-line[data-current] {
+    background-size: 100% 1.5px;
+  }
+
+  /* seat meter: ten bricks, filled start → end */
+  .seat-brick { background-color: currentColor; opacity: 0.18; }
+  .seat-brick[data-on] { opacity: 1; }
+  .seat-meter[data-reveal] .seat-brick[data-on] {
+    animation: seat-lay 0.42s var(--ease-drop) both;
+    animation-delay: calc(var(--i) * 45ms + 120ms);
+  }
+}
+@keyframes seat-lay {
+  from { opacity: 0.18; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-hairline { animation: none; transform: scaleX(1); }
+}
+
+/* fixed header (components/HeaderShell.tsx) */
+.site-header {
+  transition: transform 0.55s var(--ease-settle), background-color 0.3s linear, box-shadow 0.3s linear;
+}
+.site-header[data-solid] {
+  background-color: rgb(1 29 33 / 0.97);
+  box-shadow: 0 1px 0 rgb(95 212 170 / 0.14);
+}
+.site-header[data-hidden] {
+  transform: translateY(-100%);
+  transition-timing-function: var(--ease-exit);
+}
+html[data-menu="open"] .site-header,
+.site-header:focus-within {
+  transform: none;
+}
+html[data-menu="open"] .site-header {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* dropdown and menu items drop in like bricks (stagger with --i) */
+@keyframes brick-in {
+  from { opacity: 0; transform: translateY(-14px); }
+  to { opacity: 1; transform: none; }
+}
+.drop-in > * {
+  animation: brick-in 0.5s var(--ease-drop) both;
+  animation-delay: calc(var(--i, 0) * 38ms);
+}
+.mobile-panel:not([hidden]) {
+  animation: panel-wipe 0.42s var(--ease-settle) both;
+}
+@keyframes panel-wipe {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.mobile-panel .drop-in > * { animation-delay: calc(var(--i, 0) * 45ms + 160ms); }
+
+/* hero «الجدار الحي»: the mint brick and its word. Without JS the brick still drops (late, in
+   CSS); HeroStage sets data-motion and drives it with GSAP; reduced motion shows it in place. */
+.hero-mint {
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.5), inset 0 -4px 0 #43977B, 0 18px 30px -12px rgb(0 8 10 / 0.7);
+  transform-origin: 50% 100%;
+  will-change: transform;
+  animation: mint-fallback 0.6s var(--ease-drop) 2.2s both;
+}
+.hero-word {
+  color: var(--color-deep);
+  animation: word-fallback 0.6s linear 2.2s both;
+}
+.hero[data-motion] .hero-mint,
+.hero[data-motion] .hero-word {
+  animation: none;
+}
+@keyframes mint-fallback {
+  from { transform: translateY(-600%); }
+  to { transform: none; }
+}
+@keyframes word-fallback {
+  0%, 57% { color: #fff; }
+  58%, 100% { color: var(--color-deep); }
+}
+/* the mint brick lifts a little under the pointer (translate, so GSAP's transform stays its own) */
+.hero-mint { transition: translate 0.35s var(--ease-settle), box-shadow 0.35s var(--ease-settle); }
+@media (hover: hover) and (pointer: fine) {
+  [data-hero-brick]:hover .hero-mint { translate: 0 -3px; }
+}
+
+/* ───────────────────────── homepage sections (02-redesign §5.2–5.7) ───────────────────────── */
+
+/* §5.2 the three verbs: outline → solid through background-clip: text. --fill (0–1) is the share
+   filled from the inline-start, with a mint front. Default 1, so without JS the words are solid. */
+@property --fill {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+@utility text-verb {
+  font-size: clamp(5rem, 0.5rem + 19vw, 11rem);
+  line-height: 1.2;
+  font-weight: 700;
+  @media (min-width: 64rem) {
+    font-size: clamp(5rem, 0.4rem + 10.6vw, 11rem);
+  }
+}
+.verb-word {
+  position: relative;
+  display: inline-block;
+  padding-block: 0.08em 0.14em; /* room for the shadda and descenders inside the clipped background */
+  color: transparent;
+  background-image: linear-gradient(
+    to left,
+    #fff calc(var(--fill) * 108% - 8%),
+    var(--color-mint) calc(var(--fill) * 108% - 4%),
+    rgb(255 255 255 / 0.035) calc(var(--fill) * 108%)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+/* the outline: -webkit-text-stroke draws every glyph's own contour, so the joins of connected
+   Arabic show seams inside the word. Instead a copy of the word (data-text) goes through an SVG
+   filter (VerbsStage's #verb-hollow) that keeps only a ring around the joined shape. */
+.verb-word::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  padding-block: inherit;
+  color: #fff;
+  filter: url(#verb-hollow);
+  pointer-events: none;
+}
+[dir="ltr"] .verb-word { background-image: linear-gradient(to right, #fff calc(var(--fill) * 108% - 8%), var(--color-mint) calc(var(--fill) * 108% - 4%), rgb(255 255 255 / 0.035) calc(var(--fill) * 108%)); }
+.verb-num {
+  border: 1.5px solid var(--color-green);
+  background-color: var(--color-green);
+  color: #fff;
+  transition: background-color 0.35s var(--ease-settle), color 0.35s var(--ease-settle), border-color 0.35s var(--ease-settle), transform 0.5s var(--ease-drop);
+}
+/* while the motion runs, a square is outlined until its verb is half filled */
+[data-verb]:has(.verb-word[style*="--fill"]) .verb-num:not([data-on]) {
+  background-color: transparent;
+  border-color: rgb(95 212 170 / 0.45);
+  color: var(--color-mint);
+}
+.verb-num[data-on] { animation: num-thud 0.5s var(--ease-drop); }
+@keyframes num-thud {
+  0% { transform: translateY(-8px); }
+  100% { transform: none; }
+}
+.verb-mortar {
+  background-image: linear-gradient(to left, rgb(95 212 170 / 0.7), rgb(95 212 170 / 0.08));
+  transform-origin: var(--start) 50%;
+}
+.verbs-glow {
+  background: radial-gradient(50% 60% at 85% 30%, rgb(3 96 109 / 0.55), transparent 70%), radial-gradient(40% 50% at 10% 90%, rgb(95 212 170 / 0.07), transparent 70%);
+}
+
+/* §5.3 the band of majors */
+@utility text-marquee {
+  font-size: clamp(2.375rem, 0.9rem + 5.6vw, 6.25rem);
+  line-height: 1.32;
+  font-weight: 700;
+}
+.marquee-solid { color: var(--color-deep); }
+/* stroke under fill: the page-coloured fill covers the stroke's inner half, which hides the seams
+   where joined Arabic glyphs overlap, and leaves a clean 1.5px outline outside */
+.marquee-outline { color: var(--color-page); -webkit-text-stroke: 3px var(--color-teal); paint-order: stroke fill; }
+.marquee-sq {
+  inline-size: 0.16em;
+  block-size: 0.16em;
+  font-size: clamp(2.375rem, 0.9rem + 5.6vw, 6.25rem);
+  background-color: var(--color-green);
+}
+.marquee-outline .marquee-sq { background-color: transparent; outline: 1.5px solid var(--color-teal); outline-offset: -1.5px; }
+
+/* §5.4 the events timetable: teal fills the row from the inline-start on hover or focus */
+.tt-fill {
+  transform: scaleX(0);
+  transform-origin: var(--start) 50%;
+  transition: transform 0.55s var(--ease-settle);
+}
+.tt-row :is(.tt-ink, .tt-soft, .tt-dept, .tt-hot, .seat-meter > span) {
+  transition: color 0.3s var(--ease-settle);
+}
+.tt-row .tt-arrow { transition: background-color 0.3s var(--ease-settle), color 0.3s var(--ease-settle), border-color 0.3s var(--ease-settle); }
+/* keyboard focus always fills the row; hover only where a real pointer can hover, so a tap or a
+   scroll-stop on a phone never leaves a row stuck teal */
+.tt-row:has(:focus-visible) .tt-fill { transform: scaleX(1); }
+.tt-row:has(:focus-visible) :is(.tt-ink, .seat-meter > span:last-child) { color: #fff; }
+.tt-row:has(:focus-visible) .tt-soft { color: var(--color-on-dark); }
+.tt-row:has(:focus-visible) :is(.tt-dept, .tt-hot, .seat-meter > span:first-child) { color: var(--color-mint); }
+.tt-row:has(:focus-visible) .tt-hot i { background-color: var(--color-mint); }
+.tt-row:has(:focus-visible) .tt-arrow { background-color: var(--color-mint); border-color: var(--color-mint); color: var(--color-deep); }
+@media (hover: hover) and (pointer: fine) {
+  .tt-row:hover .tt-fill { transform: scaleX(1); }
+  .tt-row:hover :is(.tt-ink, .seat-meter > span:last-child) { color: #fff; }
+  .tt-row:hover .tt-soft { color: var(--color-on-dark); }
+  .tt-row:hover :is(.tt-dept, .tt-hot, .seat-meter > span:first-child) { color: var(--color-mint); }
+  .tt-row:hover .tt-hot i { background-color: var(--color-mint); }
+  .tt-row:hover .tt-arrow { background-color: var(--color-mint); border-color: var(--color-mint); color: var(--color-deep); }
+}
+.tt-row:focus-within :focus-visible { outline-color: var(--color-mint); }
+/* the "all events" course: arrow square slides forward */
+.tt-all .tt-arrow { transition: transform 0.45s var(--ease-settle), background-color 0.3s linear; }
+.tt-all:is(:hover, :focus-visible) .tt-arrow { transform: translateX(calc(var(--dir) * 10px)); background-color: var(--color-deep); }
+/* while LayCourses waits to lay a row, its meter shows empty, then fills on data-reveal */
+.timetable[data-armed] .seat-meter:not([data-reveal]) .seat-brick[data-on] { opacity: 0.18; }
+
+/* §5.5 departments: index + live preview */
+.dept-n {
+  border: 1.5px solid var(--color-teal-300);
+  color: var(--color-teal);
+  transition: background-color 0.3s var(--ease-settle), color 0.3s var(--ease-settle), border-color 0.3s var(--ease-settle);
+}
+.dept-name { transition: color 0.3s var(--ease-settle), translate 0.5s var(--ease-settle); }
+.dept-go { opacity: 0; translate: calc(var(--dir) * -12px) 0; transition: opacity 0.3s var(--ease-settle), translate 0.45s var(--ease-settle); }
+@media (min-width: 64rem) {
+  .dept-item[data-active] .dept-n { background-color: var(--color-green); border-color: var(--color-green); color: #fff; }
+  .dept-item[data-active] .dept-name { color: var(--color-teal); translate: calc(var(--dir) * 10px) 0; }
+  .dept-item[data-active] .dept-go { opacity: 1; translate: 0 0; }
+  .dept-list:hover .dept-item:not([data-active]) .dept-name { color: var(--color-deep-300); }
+}
+@media (max-width: 63.99rem) {
+  .dept-item[data-open] .dept-n { background-color: var(--color-green); border-color: var(--color-green); color: #fff; }
+}
+.dept-plus::before,
+.dept-plus::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: calc(50% - 1px);
+  block-size: 2px;
+  background-color: currentColor;
+  transition: transform 0.4s var(--ease-settle);
+}
+.dept-plus::after { transform: rotate(90deg); }
+[aria-expanded="true"] .dept-plus::after { transform: rotate(0deg); }
+[aria-expanded="true"].dept-toggle { background-color: var(--color-teal); color: #fff; }
+.dept-detail { grid-template-rows: 0fr; transition: grid-template-rows 0.5s var(--ease-settle); }
+.dept-item[data-open] .dept-detail { grid-template-rows: 1fr; }
+.dept-ghost { color: var(--color-deep); -webkit-text-stroke: 3px rgb(95 212 170 / 0.55); paint-order: stroke fill; }
+/* the panel's crenellated top: page-coloured gaps cut into the deep tower */
+.dept-crenel {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  block-size: var(--sq);
+  background-image: repeating-linear-gradient(to left, var(--color-box) 0 var(--sq), transparent var(--sq) calc(var(--sq) * 2));
+  z-index: 2;
+}
+.dept-panel [data-cell] { transform-origin: 50% 50%; }
+
+/* §5.6 the talent invitation */
+.talent-glow {
+  background: radial-gradient(55% 60% at 12% 85%, rgb(3 96 109 / 0.6), transparent 70%), radial-gradient(35% 40% at 90% 10%, rgb(95 212 170 / 0.08), transparent 70%);
+}
+.talent-brick {
+  position: relative;
+  background-color: var(--color-mid);
+  border-top: 4px solid rgb(95 212 170 / 0.25);
+  transition: border-color 0.4s var(--ease-settle), background-color 0.4s var(--ease-settle), transform 0.6s var(--ease-drop);
+}
+.talent-node {
+  border: 1.5px solid rgb(95 212 170 / 0.5);
+  color: var(--color-mint);
+  background-color: var(--color-deep);
+  transition: background-color 0.35s var(--ease-settle), color 0.35s var(--ease-settle);
+}
+.talent-brick[data-lit] { border-top-color: var(--color-mint); background-color: var(--color-teal-800); transform: translateY(-4px); }
+.talent-brick[data-lit] .talent-node { background-color: var(--color-mint); border-color: var(--color-mint); color: var(--color-deep); }
+.talent-cta[data-lit] { box-shadow: 0 0 0 6px rgb(95 212 170 / 0.18); }
+.talent-cta { transition: box-shadow 0.5s var(--ease-settle), color 0.34s var(--ease-settle), border-color 0.34s var(--ease-settle); }
+
+/* §5.7 the recordings strip */
+.drag-viewport { scrollbar-width: none; scroll-snap-type: x mandatory; }
+.drag-viewport::-webkit-scrollbar { display: none; }
+.drag-viewport [data-card] { scroll-snap-align: start; scroll-margin-inline: max(20px, calc((100vw - 1200px) / 2)); }
+.drag-strip[data-drag] .drag-viewport { overflow: hidden; scroll-snap-type: none; }
+.drag-strip[data-drag] .drag-track { touch-action: pan-y; user-select: none; }
+.rec-tilt { transform-origin: 50% 100%; box-shadow: 0 1px 0 var(--color-line); transition: box-shadow 0.4s var(--ease-settle), translate 0.45s var(--ease-settle); }
+.rec-card:is(:hover, :focus-within) .rec-tilt { translate: 0 -6px; box-shadow: 0 22px 34px -22px rgb(2 44 51 / 0.45); }
+.rec-wall { transition: transform 1.2s var(--ease-settle); }
+.rec-card:is(:hover, :focus-within) .rec-wall { transform: scale(1.06); }
+.rec-play { transition: inline-size 0.45s var(--ease-settle), block-size 0.45s var(--ease-settle); }
+.rec-card:is(:hover, :focus-within) .rec-play { inline-size: 4.5rem; block-size: 4.5rem; }
+.rec-card:focus-within :focus-visible { outline-offset: 4px; }
+.dept-panel [data-icon] svg { stroke-width: 1.1; }
+.rec-hole svg { stroke-width: 1.35; }
+
+/* §6 /events, the calendar (D1-10) */
+/* head: the month drops in again whenever it changes (keyed in CalendarHead) */
+.cal-head-title > * {
+  display: inline-block;
+  animation: cal-title-drop 0.8s var(--ease-drop) both;
+  animation-delay: calc(var(--i, 0) * 110ms + 60ms);
+}
+@keyframes cal-title-drop {
+  from { opacity: 0; transform: translateY(-0.45em); }
+  to { opacity: 1; transform: none; }
+}
+.cal-today {
+  background-color: rgb(1 24 28 / 0.55);
+  border-top: 3px solid var(--color-mint);
+  box-shadow: 0 4px 0 rgb(1 24 28 / 0.6);
+}
+a.cal-today { transition: transform 0.45s var(--ease-drop), box-shadow 0.45s var(--ease-settle); }
+a.cal-today:is(:hover, :focus-visible) { transform: translateY(-3px); box-shadow: 0 7px 0 rgb(1 24 28 / 0.6); }
+/* the month as a little wall: a brick per day, event days lit, today mint; re-laid per month */
+.cal-glyph i {
+  background-color: rgb(255 255 255 / 0.1);
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.25);
+  animation: cal-glyph-lay 0.5s var(--ease-drop) both;
+  animation-delay: calc(var(--i, 0) * 16ms + 200ms);
+}
+.cal-glyph i[data-outside] { background-color: transparent; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08); }
+.cal-glyph i[data-on] { background-color: rgb(220 233 235 / 0.82); }
+.cal-glyph i[data-today] { background-color: var(--color-mint); box-shadow: 0 0 0 3px rgb(95 212 170 / 0.22); }
+@keyframes cal-glyph-lay {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: none; }
+}
+[data-month-link]:is(:hover, :focus-visible) .btn::before { transform: scaleX(1); }
+[data-month-link]:is(:hover, :focus-visible) .btn { color: var(--btn-wipe-fg); border-color: var(--btn-wipe-line); }
+[data-month-link]:focus-visible { outline-offset: 6px; }
+
+/* the wall of day bricks: white bricks with a lit top edge and a shaded foot; the weekend is
+   tinted; days outside the month are recessed into the wall; past days are quieter */
+.cal-day {
+  background-color: #fff;
+  box-shadow: inset 0 1px 0 #fff, inset 0 -2px 0 rgb(2 44 51 / 0.07);
+}
+.cal-day[data-weekend] { background-color: var(--color-box); }
+.cal-day[data-outside] {
+  background-color: rgb(2 44 51 / 0.05);
+  box-shadow: inset 0 4px 0 rgb(2 44 51 / 0.07), inset 0 -1px 0 #fff;
+}
+.cal-day .cal-num { color: var(--color-deep); }
+.cal-day[data-past] .cal-num { color: var(--color-deep-300); }
+.cal-day[data-outside] .cal-num { color: var(--color-deep-200); }
+.cal-day[data-today] { box-shadow: inset 0 4px 0 var(--color-deep), inset 0 -2px 0 rgb(2 44 51 / 0.07); }
+.cal-day[data-today] .cal-num { color: var(--color-deep); }
+
+/* an event: a brick with a teal bar on the inline-start; hover or focus lifts it onto a solid
+   ledge and fills it with teal from the inline-start, like the homepage timetable rows */
+.cal-ev {
+  background-color: var(--color-teal-50);
+  border-inline-start: 4px solid var(--color-teal);
+  box-shadow: 0 0 0 transparent;
+  transition: transform 0.5s var(--ease-drop), box-shadow 0.4s var(--ease-settle);
+}
+.cal-fill {
+  background-color: var(--color-teal);
+  transform: scaleX(0);
+  transform-origin: var(--start) 50%;
+  transition: transform 0.5s var(--ease-settle);
+}
+.cal-ev .cal-time { color: var(--color-teal); }
+.cal-ev .cal-title { color: var(--color-deep); }
+.cal-ev .cal-dept { color: var(--color-accent-strong); }
+.cal-ev .cal-flag { color: var(--color-muted); }
+.cal-ev[data-status="almostFull"] .cal-flag { color: var(--color-warning); }
+.cal-ev :is(.cal-time, .cal-title, .cal-dept, .cal-flag) { transition: color 0.3s var(--ease-settle); }
+.cal-day[data-past] .cal-ev { background-color: var(--color-box); border-inline-start-color: var(--color-deep-200); }
+.cal-day[data-past] .cal-ev .cal-time { color: var(--color-muted); }
+.cal-day[data-past] .cal-ev .cal-title { color: var(--color-deep-600); }
+.cal-ev[data-status="cancelled"] { background-color: transparent; border-inline-start-color: var(--color-deep-200); outline: 1px dashed var(--color-deep-200); outline-offset: -1px; }
+.cal-ev[data-status="cancelled"] :is(.cal-time, .cal-title, .cal-dept) { color: var(--color-muted); }
+.cal-ev[data-status="cancelled"] .cal-title { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.cal-ev[data-status="cancelled"] .cal-flag { color: var(--color-danger); }
+.cal-ev:has(:focus-visible) { transform: translateY(-4px); box-shadow: 0 4px 0 var(--color-deep); }
+.cal-ev:has(:focus-visible) .cal-fill { transform: scaleX(1); }
+.cal-ev:has(:focus-visible) :is(.cal-time, .cal-title) { color: #fff; }
+.cal-ev:has(:focus-visible) :is(.cal-dept, .cal-flag) { color: var(--color-mint); }
+.cal-ev:focus-within :focus-visible { outline-color: var(--color-mint); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) {
+  .cal-ev:hover { transform: translateY(-4px); box-shadow: 0 4px 0 var(--color-deep); z-index: 1; }
+  .cal-ev:hover .cal-fill { transform: scaleX(1); }
+  .cal-ev:hover :is(.cal-time, .cal-title) { color: #fff; }
+  .cal-ev:hover :is(.cal-dept, .cal-flag) { color: var(--color-mint); }
+}
+
+/* the next-event banner: a raised deep brick with a mint edge on the inline-start */
+.cal-banner {
+  background-color: var(--color-deep);
+  background-image: radial-gradient(60% 120% at 0% 0%, rgb(3 96 109 / 0.55), transparent 70%);
+  border-inline-start: 6px solid var(--color-mint);
+  box-shadow: 0 8px 0 var(--color-deep-900);
+  transform: translateY(-8px);
+  transition: transform 0.55s var(--ease-drop), box-shadow 0.45s var(--ease-settle);
+}
+.cal-banner:is(:hover, :focus-within) { transform: translateY(-12px); box-shadow: 0 12px 0 var(--color-deep-900); }
+.cal-banner .cal-banner-go { transition: transform 0.45s var(--ease-settle); }
+.cal-banner:is(:hover, :focus-within) .cal-banner-go { transform: translateX(calc(var(--dir) * 8px)); }
+.cal-banner :focus-visible { outline-color: var(--color-mint); }
+
+/* the empty month's short wall, with one brick missing */
+.cal-brick {
+  background-color: #e3edea;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8), inset 0 -3px 0 rgb(2 44 51 / 0.1);
+}
+.cal-brick[data-hole] {
+  background-color: var(--color-deep);
+  box-shadow: inset 0 8px 0 rgb(0 0 0 / 0.35), inset 0 0 0 1.5px rgb(95 212 170 / 0.5);
+}
+
+/* §6 /events/[id], the event page (D1-11) */
+/* head: the day figure drops in like a brick */
+.ev-day {
+  display: inline-block;
+  animation: ev-day-drop 0.9s var(--ease-drop) both;
+  animation-delay: 0.12s;
+}
+@keyframes ev-day-drop {
+  from { opacity: 0; transform: translateY(-0.4em); }
+  to { opacity: 1; transform: none; }
+}
+/* the ledger under the description: light bricks in running bond */
+.ev-brick {
+  background-color: #fff;
+  box-shadow: inset 0 1px 0 #fff, inset 0 -3px 0 rgb(2 44 51 / 0.08);
+}
+.ev-brick-half { background-color: var(--color-box); }
+
+/* the register block: a deep brick with a mint top course. Phones: a bar stuck to the bottom of
+   the screen while the description is read (it settles at the end of it); desktop: sticky beside
+   the description, set into the head's wall */
+.reg-block {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: 30;
+  margin-inline: -20px;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  background-color: var(--color-deep);
+  background-image: radial-gradient(80% 140% at 100% 0%, rgb(3 96 109 / 0.55), transparent 70%);
+  border-block-start: 4px solid var(--color-mint);
+  box-shadow: 0 -16px 36px -22px rgb(2 44 51 / 0.7);
+}
+@media (min-width: 40rem) {
+  .reg-block { margin-inline: -32px; padding-inline: 32px; }
+}
+@media (min-width: 64rem) {
+  .reg-block {
+    inset-block-start: calc(var(--header-h) + 1.25rem);
+    inset-block-end: auto;
+    margin-inline: 0;
+    margin-block-start: -9rem;
+    padding: 2rem 2rem 1.75rem;
+    border-block-start-width: 6px;
+    box-shadow: 0 10px 0 var(--color-deep-900);
+  }
+}
+.reg-block .reg-note, .reg-block .reg-extra { display: none; }
+@media (min-width: 64rem) {
+  .reg-block .reg-note { display: block; }
+  .reg-block .reg-extra { display: block; margin-block-start: 1.25rem; padding-block-start: 1rem; border-block-start: 1px solid rgb(220 233 235 / 0.14); }
+}
+
+/* the seat wall: holes are seats left, laid bricks are seats taken, the visitor's brick is mint */
+.sw { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-block-end: 10px; }
+.sw-count { font-size: 0.9375rem; line-height: 1.4; font-weight: 600; color: #fff; }
+.sw-figure { font-size: 1.25rem; font-weight: 700; color: #fff; }
+.sw-wall {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(10, 12px);
+  grid-auto-rows: 9px;
+  gap: 3px;
+  margin-inline-start: auto;
+}
+.sw-wall > i { grid-row: 1; grid-column: var(--pc); }
+.sw-half, .sw-tag { display: none; }
+.sw-brick {
+  background-color: rgb(0 0 0 / 0.3);
+  box-shadow: inset 0 3px 0 rgb(0 0 0 / 0.3), inset 0 0 0 1px rgb(95 212 170 / 0.3);
+}
+.sw-brick[data-on], .sw-half {
+  background-color: var(--color-teal);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 -2px 0 rgb(0 0 0 / 0.3);
+}
+.sw-half { background-color: var(--color-mid); }
+.sw-own {
+  position: relative;
+  z-index: 1;
+  background-color: var(--color-mint);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6), inset 0 -2px 0 rgb(0 0 0 / 0.2), 0 0 18px rgb(95 212 170 / 0.45);
+}
+.sw-puff { position: absolute; inset-block-start: 0; inset-inline-start: 0; inline-size: 7px; block-size: 7px; background-color: var(--color-mint); pointer-events: none; }
+/* settled (closed, ended): a finished wall of calm stone; void (cancelled): the outline of a wall never built */
+.sw[data-tone="settled"] :is(.sw-brick, .sw-half) { background-color: rgb(220 233 235 / 0.14); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), inset 0 -2px 0 rgb(0 0 0 / 0.25); }
+.sw[data-tone="void"] :is(.sw-brick, .sw-half) { background-color: transparent; box-shadow: none; outline: 1px dashed rgb(220 233 235 / 0.32); outline-offset: -1px; }
+@media (min-width: 64rem) {
+  .sw { display: block; margin-block-end: 1.75rem; }
+  .sw-count { font-size: 1.375rem; line-height: 1.3; }
+  .sw-count-text { font-size: 1.75rem; font-weight: 700; }
+  .sw-figure { display: inline-block; font-size: clamp(4.5rem, 2.5rem + 3.4vw, 6.25rem); line-height: 1.05; animation: sw-thud 0.7s var(--ease-drop) both; }
+  .sw-wall { grid-template-columns: repeat(11, minmax(0, 1fr)); grid-auto-rows: 2.75rem; gap: 4px; margin-block-start: 2.75rem; margin-inline-start: 0; }
+  .sw-wall > i { grid-row: var(--r); grid-column: var(--c) / span 2; }
+  .sw-wall > .sw-half { display: block; grid-column: var(--c) / span 1; }
+  .sw-brick { box-shadow: inset 0 7px 0 rgb(0 0 0 / 0.3), inset 0 0 0 1px rgb(95 212 170 / 0.3); }
+  .sw-brick[data-on], .sw-half { box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.16), inset 0 -4px 0 rgb(0 0 0 / 0.3); }
+  .sw-own { box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.6), inset 0 -4px 0 rgb(0 0 0 / 0.2), 0 0 0 4px rgb(95 212 170 / 0.16), 0 0 34px rgb(95 212 170 / 0.5); }
+  .sw-tag {
+    display: block;
+    position: absolute;
+    inset-block-end: calc(100% + 10px);
+    inset-inline: 0;
+    inline-size: max-content;
+    margin-inline: auto;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--color-mint);
+  }
+  .sw-tag::after { content: ""; position: absolute; inset-block-start: calc(100% + 2px); inset-inline-start: calc(50% - 0.5px); inline-size: 1px; block-size: 6px; background-color: var(--color-mint); }
+}
+@keyframes sw-thud {
+  from { opacity: 0; transform: translateY(-0.3em); }
+  to { opacity: 1; transform: none; }
+}
+
+/* the button's states: registered is a mint plate laid in from the inline-start; ended, closed and
+   cancelled are a calm settled plate with a pale bar, never an error */
+.reg-done {
+  background-color: var(--color-mint);
+  color: var(--color-deep);
+  animation: reg-plate 0.6s var(--ease-settle) both;
+}
+@keyframes reg-plate {
+  from { clip-path: inset(0 0 0 100%); }
+  to { clip-path: inset(0 0 0 0); }
+}
+[dir="ltr"] .reg-done { animation-name: reg-plate-ltr; }
+@keyframes reg-plate-ltr {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.reg-settled { background-color: rgb(255 255 255 / 0.06); border-inline-start: 4px solid rgb(220 233 235 / 0.5); }
+.reg-figure { animation: sw-thud 0.7s var(--ease-drop) both; }
+@media (max-width: 63.99rem) {
+  .reg { gap: 10px; }
+  .reg .reg-act { min-block-size: 3.25rem; font-size: 1.0625rem; }
+  .reg :is(.reg-done, .reg-settled) { min-block-size: 3.25rem; font-size: 1.125rem; }
+  .reg-position .reg-figure { font-size: 2.75rem; }
+  .reg-position p { padding-block-end: 0.25rem; font-size: 1rem; }
+}
+
+/* the confirm dialog: a deep brick that drops in over a dimmed page */
+.confirm {
+  border: 0;
+  max-inline-size: none;
+  border-block-start: 6px solid var(--color-mint);
+  box-shadow: 0 12px 0 var(--color-deep-900);
+}
+.confirm::backdrop { background-color: rgb(1 24 28 / 0.8); }
+.confirm[open] { animation: confirm-drop 0.6s var(--ease-drop) both; }
+@keyframes confirm-drop {
+  from { opacity: 0; transform: translateY(-48px); }
+  to { opacity: 1; transform: none; }
 }

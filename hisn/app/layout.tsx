@@ -3,7 +3,9 @@ import type { ReactNode } from 'react'
 import { IBM_Plex_Sans_Arabic } from 'next/font/google'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
-import { Hairline } from '@/components/brand/Hairline'
+import { FooterCurtain } from '@/components/FooterCurtain'
+import { ProgressHairline } from '@/components/ProgressHairline'
+import { MotionProvider } from '@/components/motion/MotionProvider'
 import { SkipLink } from '@/components/ui/SkipLink'
 import { t } from '@/lib/i18n/t'
 import './globals.css'
@@ -27,16 +29,26 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: '#022C33', colorScheme: 'light' }
 
+/*
+  Shell (redesign §4): the hairline is the scroll-progress bar, the header is fixed over the page
+  (so every page starts with a dark head carrying data-band="dark"), and the page is a curtain
+  that lifts off the fixed footer. MotionProvider runs GSAP and Lenis.
+*/
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ar" dir="rtl" className={plex.variable}>
-      <body className="flex min-h-dvh flex-col antialiased">
-        <SkipLink />
-        <Hairline />
-        {/* session is null until D2-4 (getSession) merges — dev-1 D1-5 stub */}
-        <Header session={null} />
-        <main id="main" tabIndex={-1} className="flex-1 outline-none">{children}</main>
-        <Footer />
+      <body className="antialiased">
+        <MotionProvider>
+          <SkipLink />
+          <ProgressHairline />
+          {/* session is null until D2-4 (getSession) merges — dev-1 D1-5 stub */}
+          <Header session={null} />
+          <div className="curtain-page flex min-h-dvh flex-col">
+            <main id="main" tabIndex={-1} className="flex-1 outline-none">{children}</main>
+          </div>
+          <Footer />
+          <FooterCurtain />
+        </MotionProvider>
       </body>
     </html>
   )

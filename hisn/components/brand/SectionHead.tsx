@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
-import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
-import { Icon } from '@/components/ui/Icon'
+import { ArrowLink } from '@/components/ui/ArrowLink'
+import { cn } from '@/lib/cn'
 import { fmtNum } from '@/lib/i18n/number'
 import { SectionMarks } from './SectionMarks'
 import { SectionNumber } from './SectionNumber'
@@ -11,23 +10,39 @@ type Props = {
   /** id of the h2, for the section's aria-labelledby */
   id: string
   title: ReactNode
+  /** one line under the title */
+  intro?: ReactNode
   /** "see all" link at the end of the row */
   link?: { href: string; label: string }
+  /** 'dark' on deep/mid bands */
+  tone?: 'light' | 'dark'
+  className?: string
 }
 
-/** Numbered section heading (guide: number in a green square, title, ■■■), with a hairline under it. */
-export function SectionHead({ number, id, title, link }: Props) {
+/**
+ * Numbered section heading (redesign): the green square ٠١ and ■■■ above a big bold title, with an
+ * optional intro line and a "see all" ArrowLink on the row's inline-end.
+ */
+export function SectionHead({ number, id, title, intro, link, tone = 'light', className }: Props) {
   return (
-    <div className="mb-8 flex flex-wrap items-center gap-x-3.5 gap-y-2 border-b border-line pb-4">
-      <SectionNumber>{fmtNum(number, { minimumIntegerDigits: 2 })}</SectionNumber>
-      <h2 id={id} className="text-h2 text-heading">{title}</h2>
-      <SectionMarks />
-      {link && (
-        <Link href={link.href} className="ms-auto inline-flex min-h-11 items-center gap-1.5 font-semibold text-teal underline-offset-4 hover:underline">
-          {link.label}
-          <Icon icon={ChevronRight} mirror size={18} />
-        </Link>
-      )}
+    <div className={cn('mb-10 lg:mb-14', className)}>
+      <div className="flex items-center gap-4">
+        <SectionNumber size="lg">{fmtNum(number, { minimumIntegerDigits: 2 })}</SectionNumber>
+        <SectionMarks size="lg" />
+      </div>
+      <div className="mt-5 flex flex-wrap items-end justify-between gap-x-10 gap-y-3">
+        <div className="max-w-[44rem]">
+          <h2 id={id} className={cn('text-[clamp(2rem,1.25rem+2.9vw,3.75rem)] leading-[1.2] font-bold text-balance', tone === 'dark' ? 'text-white' : 'text-heading')}>
+            {title}
+          </h2>
+          {intro && <p className={cn('mt-3 text-body', tone === 'dark' ? 'text-on-dark' : 'text-muted')}>{intro}</p>}
+        </div>
+        {link && (
+          <ArrowLink href={link.href} tone={tone} className="text-[1.0625rem]">
+            {link.label}
+          </ArrowLink>
+        )}
+      </div>
     </div>
   )
 }

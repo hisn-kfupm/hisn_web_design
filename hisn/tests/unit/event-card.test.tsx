@@ -26,21 +26,21 @@ describe('EventCard', () => {
     render(<EventCard event={event} variant="upcoming" />)
     const link = screen.getByRole('link', { name: /مدخل إلى هندسة الأنظمة/ })
     expect(link.getAttribute('href')).toBe('/events/42')
-    expect(link.textContent).toContain('18 نوفمبر 2026')
+    expect(link.textContent).toContain('١٨ نوفمبر ٢٠٢٦')
   })
 
   it('shows the department, the Riyadh time range and the place', () => {
     const { container } = render(<EventCard event={event} variant="upcoming" />)
     expect(container.textContent).toContain(t('dept.DEPT_3.title'))
-    expect(container.textContent).toContain('6:00–8:00')
-    expect(container.textContent).toContain('مبنى 58 · قاعة 102')
+    expect(container.textContent).toContain('٦:٠٠–٨:٠٠')
+    expect(container.textContent).toContain('مبنى ٥٨ · قاعة ١٠٢')
   })
 
   it('hides the visual date block from screen readers', () => {
     const { container } = render(<EventCard event={event} variant="upcoming" />)
     const block = container.querySelector('[data-testid="date-block"]')
     expect(block?.getAttribute('aria-hidden')).toBe('true')
-    expect(block?.textContent).toContain('18')
+    expect(block?.textContent).toContain('١٨')
   })
 
   it('says "online" instead of a place for online events', () => {

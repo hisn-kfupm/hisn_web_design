@@ -1,5 +1,7 @@
 import type { PublicEvent } from './types'
+import { stripDraft } from '@/lib/i18n/t'
 import { standInRows, type EventRow } from './stand-in'
+import { monthRangeUtc } from './month'
 
 /*
   Read queries for public events (dev-1 D1-8).
@@ -21,14 +23,15 @@ export const PUBLIC_EVENT_COLUMNS =
 export function toPublicEvent(row: Record<string, unknown>): PublicEvent {
   return {
     id: row.id as number,
-    title: row.title as string,
-    description: row.description as string,
+    // stand-in copy carries « «مؤقت» »; demos (NEXT_PUBLIC_HIDE_DRAFT_MARKERS=1) leave it out
+    title: stripDraft(row.title as string),
+    description: stripDraft(row.description as string),
     departmentCode: row.department_code as string | null,
     startsAt: row.starts_at as string,
     endsAt: row.ends_at as string,
     format: row.format as PublicEvent['format'],
     location: row.location as string | null,
-    presenter: row.presenter as string | null,
+    presenter: row.presenter === null ? null : stripDraft(row.presenter as string),
     capacity: row.capacity as number | null,
     registrationClosesAt: row.registration_closes_at as string,
     status: row.status as PublicEvent['status'],
@@ -81,4 +84,24 @@ export async function latestRecordings({ limit, departmentCode }: ListOptions): 
 export async function getPublicEvent(id: number): Promise<PublicEvent | null> {
   const row = standInRows().find((r) => r.id === id && (r.status === 'published' || r.status === 'cancelled'))
   return row ? toPublicEvent(row) : null
+}
+
+/**
+ * Published and cancelled events that start inside the Riyadh month 'YYYY-MM', earliest first
+ * (dev-1 D1-10, the calendar). Past events stay in: the calendar badges them «انتهت».
+ * Real: const { from, to } = monthRangeUtc(month)
+ *   db.from('events').select(PUBLIC_EVENT_COLUMNS).in('status', ['published', 'cancelled'])
+ *   .gte('starts_at', from).lt('starts_at', to).order('starts_at', { ascending: true })
+ */
+export async function eventsInMonth(month: string): Promise<PublicEvent[]> {
+  const { from, to } = monthRangeUtc(month)
+  const [start, end] = [Date.parse(from), Date.parse(to)]
+  return standInRows(Date.now())
+    .filter((r) => r.status === 'published' || r.status === 'cancelled')
+    .filter((r) => {
+      const at = Date.parse(r.starts_at)
+      return at >= start && at < end
+    })
+    .sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at))
+    .map(toPublicEvent)
 }

@@ -2,32 +2,26 @@ import { cn } from '@/lib/cn'
 
 type Options = {
   variant?: 'primary' | 'secondary' | 'ghost'
-  /** 'dark' for buttons on the deep plate */
+  /** 'dark' for buttons on deep/mid/teal bands */
   tone?: 'light' | 'dark'
-  size?: 'md' | 'sm'
+  size?: 'md' | 'sm' | 'lg'
   block?: boolean
   className?: string
 }
 
 /**
- * Button classes for <button> and <Link>. Square corners; min 44–48 px targets.
- * Colours change instantly on hover; only transform animates (press = 1 px down).
+ * Button classes for <button> and <Link> (prefer the <Button>/<LinkButton> components).
+ * Square corners, 44–56 px targets. On hover a fill wipes in from the inline-start (.btn in
+ * app/globals.css); press moves 1 px. Ghost is a text link whose underline draws in.
  */
 export function buttonClass({ variant = 'primary', tone = 'light', size = 'md', block = false, className }: Options = {}): string {
-  const base =
-    'inline-flex items-center justify-center gap-2 whitespace-nowrap border-[1.5px] font-semibold no-underline transition-transform duration-75 ease-linear active:translate-y-px disabled:cursor-progress disabled:opacity-80'
-  const sizes = { md: 'min-h-12 px-6 py-3 text-body', sm: 'min-h-11 px-4 py-2 text-[0.9375rem]' }
-  const looks = {
-    light: {
-      primary: 'border-transparent bg-teal text-white hover:bg-teal-700',
-      secondary: 'border-teal text-teal hover:bg-teal-100',
-      ghost: 'min-h-11 border-transparent px-2 text-teal underline decoration-1 underline-offset-[0.35em] hover:text-teal-700',
-    },
-    dark: {
-      primary: 'border-transparent bg-page text-deep hover:bg-mint',
-      secondary: 'border-teal-100/70 text-white hover:bg-white/10',
-      ghost: 'min-h-11 border-transparent px-2 text-white underline decoration-1 underline-offset-[0.35em]',
-    },
+  if (variant === 'ghost') {
+    return cn(
+      'group inline-flex min-h-11 items-center gap-2 px-1 font-semibold no-underline transition-transform duration-75 active:translate-y-px',
+      tone === 'dark' ? 'text-white' : 'text-teal',
+      className,
+    )
   }
-  return cn(base, variant !== 'ghost' && sizes[size], looks[tone][variant], block && 'w-full whitespace-normal', className)
+  const sizes = { sm: 'min-h-11 px-4 py-2 text-[0.9375rem]', md: 'min-h-12 px-6 py-3 text-body', lg: 'min-h-14 px-7 py-3.5 text-[1.0625rem]' }
+  return cn('btn', `btn-${tone}-${variant}`, sizes[size], block && 'w-full whitespace-normal', className)
 }
