@@ -890,13 +890,13 @@ a.cal-today:is(:hover, :focus-visible) { transform: translateY(-3px); box-shadow
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   :is(a, .group, .photo):hover .photo-img { transform: scale(1.04); }
 }
-/* teal multiply at 40 %: contained to the frame, static, never animated */
+/* teal multiply at 38 %: contained to the frame, static, never animated */
 .photo-grade {
   position: absolute;
   inset: 0;
   z-index: 1;
   background-color: var(--color-teal);
-  opacity: 0.4;
+  opacity: 0.38;
   mix-blend-mode: multiply;
   pointer-events: none;
 }
@@ -918,8 +918,10 @@ a.cal-today:is(:hover, :focus-visible) { transform: translateY(-3px); box-shadow
   grid-template-rows: repeat(var(--rows, 3), 1fr);
   pointer-events: none;
 }
+/* the outline hides hairline seams between fractional cells */
 .photo-cells > i {
   background-color: var(--cell);
+  outline: 1px solid var(--cell);
   transform: scale(1.02);
   transition: transform 0.55s var(--ease-settle) var(--d, 0ms), opacity 0.4s linear var(--d, 0ms);
 }
