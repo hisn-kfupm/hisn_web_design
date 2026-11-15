@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatRiyadh, riyadhDateKey, riyadhMonth } from '@/lib/time/riyadh'
+import { formatRiyadh, formatRiyadhTimeRange, riyadhDateKey, riyadhMonth } from '@/lib/time/riyadh'
 
 describe('riyadhDateKey', () => {
   it('keeps the date while it is still the same day in Riyadh (UTC+3)', () => {
@@ -51,5 +51,31 @@ describe('formatRiyadh', () => {
 
   it('uses the Riyadh date near midnight', () => {
     expect(formatRiyadh('2026-11-30T21:30:00Z', 'date')).toContain('ديسمبر')
+  })
+
+  it('has the parts of the event card date block', () => {
+    expect(formatRiyadh('2026-11-18T15:00:00Z', 'day')).toBe('18')
+    expect(formatRiyadh('2026-11-18T15:00:00Z', 'month')).toBe('نوفمبر')
+    expect(formatRiyadh('2026-11-18T15:00:00Z', 'weekday')).toBe('الأربعاء')
+    expect(formatRiyadh('2026-11-18T15:00:00Z', 'monthYear')).toBe('نوفمبر 2026')
+  })
+
+  it('uses the Riyadh day for the day number', () => {
+    expect(formatRiyadh('2026-11-30T21:30:00Z', 'day')).toBe('1')
+  })
+})
+
+describe('formatRiyadhTimeRange', () => {
+  it('shows start and end in Riyadh time, sharing the period', () => {
+    const range = formatRiyadhTimeRange('2026-11-18T15:00:00Z', '2026-11-18T17:00:00Z')
+    expect(range).toContain('6:00')
+    expect(range).toContain('8:00')
+    expect(range).not.toContain('15:00')
+  })
+
+  it('names both periods when they differ', () => {
+    const range = formatRiyadhTimeRange('2026-11-18T06:00:00Z', '2026-11-18T17:00:00Z')
+    expect(range).toContain('ص')
+    expect(range).toContain('م')
   })
 })

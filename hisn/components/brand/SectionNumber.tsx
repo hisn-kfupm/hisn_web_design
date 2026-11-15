@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
  */
 export function SectionNumber({ children }: { children: ReactNode }) {
   return (
-    <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center bg-green text-[1.1875rem] leading-none font-bold text-white">
+    <span aria-hidden="true" data-testid="section-number" className="grid size-9 shrink-0 place-items-center bg-green text-[1.1875rem] leading-none font-bold text-white">
       {children}
     </span>
   )
