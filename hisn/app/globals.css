@@ -876,3 +876,54 @@ a.cal-today:is(:hover, :focus-visible) { transform: translateY(-3px); box-shadow
   from { opacity: 0; transform: translateY(-48px); }
   to { opacity: 1; transform: none; }
 }
+
+/* photos (components/ui/Photo.tsx): fixed-ratio frame, brand grade, hover zoom, square reveal */
+.photo {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: var(--color-deep);
+  --cell: var(--color-page);
+}
+.photo[data-tone="dark"] { --cell: var(--color-deep); }
+.photo-img { transition: transform 1.2s var(--ease-settle); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :is(a, .group, .photo):hover .photo-img { transform: scale(1.04); }
+}
+/* teal multiply at 40 %: contained to the frame, static, never animated */
+.photo-grade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-color: var(--color-teal);
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+.photo-glint {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 3;
+  inline-size: 14px;
+  block-size: 14px;
+  background-color: var(--color-mint);
+}
+.photo-cells {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), 1fr);
+  grid-template-rows: repeat(var(--rows, 3), 1fr);
+  pointer-events: none;
+}
+.photo-cells > i {
+  background-color: var(--cell);
+  transform: scale(1.02);
+  transition: transform 0.55s var(--ease-settle) var(--d, 0ms), opacity 0.4s linear var(--d, 0ms);
+}
+.photo-cells[data-play] > i { transform: scale(0); opacity: 0; }
+@media print {
+  .photo-cells { display: none; }
+}
