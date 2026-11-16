@@ -23,7 +23,7 @@ export function Header(props: { session: { email: string } | null }) {
     <HeaderShell>
       <div className="wrap flex h-(--header-h) items-center gap-4">
         <Link href="/" aria-label={t('header.home')} className="relative z-10 shrink-0">
-          <Logo tone="reversed" height={44} idPrefix="header" className="lg:h-[50px] lg:w-auto" />
+          <Logo tone="reversed" height={38} idPrefix="header" className="lg:h-[50px] lg:w-auto" />
         </Link>
         <HeaderNav label={t('header.nav')} departmentsLabel={t('nav.departments')} departments={departments} items={items} />
         <div className="relative z-10 ms-auto flex items-center gap-2">

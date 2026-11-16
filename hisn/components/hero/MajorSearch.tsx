@@ -14,8 +14,8 @@ import {
 import { Search, X } from 'lucide-react'
 import { Icon } from '@/components/ui/Icon'
 import { SectionMarks } from '@/components/brand/SectionMarks'
-import { useLenis } from '@/components/motion/MotionProvider'
 import { pickPlural, type PluralCategory } from '@/lib/i18n/plural'
+import { prefersReducedMotion } from '@/lib/motion/useReducedMotion'
 
 export type SearchMajor = { code: string; ar: string; en: string }
 export type SearchLabels = {
@@ -37,13 +37,10 @@ type Props = {
   /** matching codes while typing, null when the field is empty */
   onQuery: (codes: string[] | null) => void
   onPick: (major: SearchMajor) => void
-  /** HeroStage calls this after a pulled brick goes back: the list stays closed until the next keystroke */
+  /** HeroSearch calls this after the result card closes: the list stays closed until the next keystroke */
   restRef?: RefObject<(() => void) | null>
-  /** id of the element the upward list must not cover (the slogan) */
-  avoidId?: string
 }
 
-const DESKTOP = '(min-width: 64rem)'
 const PHONE = '(max-width: 39.99rem)'
 const ROW = 48
 
@@ -73,11 +70,11 @@ export function matchMajors(majors: SearchMajor[], query: string): SearchMajor[]
 }
 
 /**
- * «ابحث عن تخصصك» (redesign §5.1): a combobox over the majors. Typing lights the matching bricks
- * in the wall; choosing one pulls its brick out. Arrow keys move through the options, Enter
+ * «ما تخصصك؟» (revision 04 §4.1): a combobox over the majors, the hero's second path. Typing
+ * lights the matching bricks in the wall; choosing one shows its result card (HeroSearch). Arrow keys move through the options, Enter
  * chooses, Escape closes the list and then clears. Results are announced through aria-live.
  */
-export function MajorSearch({ majors, labels, inputRef, onQuery, onPick, restRef, avoidId }: Props) {
+export function MajorSearch({ majors, labels, inputRef, onQuery, onPick, restRef }: Props) {
   const id = useId()
   const listId = `${id}-list`
   const [query, setQuery] = useState('')
@@ -88,10 +85,7 @@ export function MajorSearch({ majors, labels, inputRef, onQuery, onPick, restRef
   const shown = matches.slice(0, 7)
   const expanded = open && shown.length > 0
   const phone = useSyncExternalStore(subscribePhone, isPhone, () => false)
-  const lenis = useLenis()
   const field = useRef<HTMLDivElement>(null)
-  /** where the list opens: upward (desktop, above the field) within the room left under the slogan, or downward */
-  const [place, setPlace] = useState<{ up: boolean; max: number }>({ up: false, max: 288 })
   /** after a pulled brick goes back, focus returns here without reopening the old list */
   const quiet = useRef(false)
 
@@ -100,26 +94,15 @@ export function MajorSearch({ majors, labels, inputRef, onQuery, onPick, restRef
     setOpen(false)
   })
 
-  // desktop: the list opens upward, but never over the slogan (the page's h1). It gets the room
-  // between the field and the slogan, and scrolls inside; with under three rows of room it opens
-  // downward and the page scrolls so the field and the list stay on screen.
+  // the list always opens downward; when it would run past the bottom of the screen, the page
+  // scrolls (natively) so the field sits under the header with its list in view
   useLayoutEffect(() => {
-    if (!expanded || !window.matchMedia(DESKTOP).matches) return
+    if (!expanded) return
     const box = field.current?.getBoundingClientRect()
-    const avoid = avoidId ? document.getElementById(avoidId)?.getBoundingClientRect() : null
-    if (!box) return
-    const room = box.top - (avoid ? avoid.bottom : 0) - 12 - 4
-    const need = Math.min(shown.length, 3) * ROW
-    if (room >= need) {
-      setPlace((p) => (p.up && p.max === room ? p : { up: true, max: Math.min(room, 288) }))
-      return
+    if (box && box.bottom + Math.min(shown.length, 4) * ROW + 12 > window.innerHeight) {
+      field.current?.scrollIntoView({ block: 'start', behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
     }
-    setPlace((p) => (!p.up && p.max === 288 ? p : { up: false, max: 288 }))
-    if (box.bottom + 288 > window.innerHeight) {
-      if (lenis) lenis.scrollTo(field.current!, { offset: -120 })
-      else field.current?.scrollIntoView({ block: 'start' })
-    }
-  }, [expanded, shown.length, avoidId, lenis])
+  }, [expanded, shown.length])
 
   const change = (value: string) => {
     quiet.current = false
@@ -207,10 +190,7 @@ export function MajorSearch({ majors, labels, inputRef, onQuery, onPick, restRef
           role="listbox"
           aria-label={labels.results}
           hidden={!expanded}
-          data-up={place.up || undefined}
-          style={{ maxHeight: place.max }}
-          className="drop-in absolute inset-x-0 top-full z-30 m-0 mt-1 list-none overflow-auto overscroll-contain border-t-2 border-mint bg-deep-700 p-0 shadow-[0_24px_40px_-16px_rgb(0_8_10/0.9)] data-up:top-auto data-up:bottom-full data-up:mt-0 data-up:mb-1 data-up:border-t-0 data-up:border-b-2"
-          data-lenis-prevent
+          className="drop-in absolute inset-x-0 top-full z-30 m-0 mt-1 max-h-72 list-none overflow-auto overscroll-contain border-t-2 border-mint bg-deep-700 p-0 shadow-[0_24px_40px_-16px_rgb(0_8_10/0.9)]"
         >
           {shown.map((m, i) => (
             <li

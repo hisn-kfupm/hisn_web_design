@@ -6,7 +6,6 @@ import { Menu, X } from 'lucide-react'
 import { Icon } from '@/components/ui/Icon'
 import { ArrowGlyph } from '@/components/ui/ArrowGlyph'
 import { SectionMarks } from '@/components/brand/SectionMarks'
-import { useLenis } from '@/components/motion/MotionProvider'
 import { deptIcon } from '@/lib/data/dept-icons'
 import type { NavItem } from '@/components/nav-items'
 
@@ -29,7 +28,6 @@ export function MobileMenu({ labels, departments, items }: Props) {
   const id = useId()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLElement>(null)
-  const lenis = useLenis()
   const pathname = usePathname()
 
   const close = useCallback((focusButton = false) => {
@@ -51,7 +49,6 @@ export function MobileMenu({ labels, departments, items }: Props) {
       return
     }
     root.dataset.menu = 'open'
-    lenis?.stop()
     const prevOverflow = root.style.overflow
     root.style.overflow = 'hidden'
     panelRef.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus({ preventScroll: true })
@@ -74,9 +71,8 @@ export function MobileMenu({ labels, departments, items }: Props) {
       document.removeEventListener('keydown', onKey)
       root.style.overflow = prevOverflow
       delete root.dataset.menu
-      lenis?.start()
     }
-  }, [open, close, lenis])
+  }, [open, close])
 
   return (
     <>
@@ -97,10 +93,8 @@ export function MobileMenu({ labels, departments, items }: Props) {
         hidden={!open}
         aria-label={labels.nav}
         data-testid="mobile-menu"
-        className="mobile-panel fixed inset-0 z-[-1] overflow-y-auto bg-deep-700 pt-(--header-h) lg:hidden"
-        data-lenis-prevent
+        className="mobile-panel fixed inset-0 z-[-1] overflow-y-auto overscroll-contain bg-deep-700 pt-(--header-h) lg:hidden"
       >
-        <div aria-hidden="true" className="grain-layer" />
         <div className="wrap relative flex min-h-full flex-col pt-6 pb-10">
           <ul className="drop-in m-0 list-none p-0">
             {items.map((item, i) => (

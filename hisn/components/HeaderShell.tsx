@@ -37,17 +37,8 @@ export function HeaderShell({ children }: { children: ReactNode }) {
     }
 
     // transparent over dark bands, solid over light content: an IntersectionObserver watches a
-    // 1 px line just under the header, so nothing is measured on scroll. The curtain footer is
-    // fixed under the page, so it only counts once the page above it has scrolled past that line.
-    const footer = document.querySelector<HTMLElement>('.curtain-footer')
-    const page = document.querySelector<HTMLElement>('.curtain-page')
+    // 1 px line just under the header, so nothing is measured on scroll
     const hits = new Set<Element>()
-    let pageOnLine = true
-    const paint = () => {
-      const footerShows = !!footer && hits.has(footer) && (!pageOnLine || document.documentElement.dataset.curtain !== 'on')
-      const dark = [...hits].some((el) => el !== footer) || footerShows
-      header.toggleAttribute('data-solid', !dark)
-    }
     let io: IntersectionObserver | null = null
     const observe = () => {
       io?.disconnect()
@@ -57,18 +48,16 @@ export function HeaderShell({ children }: { children: ReactNode }) {
       io = new IntersectionObserver(
         (entries) => {
           for (const e of entries) {
-            if (e.target === page) pageOnLine = e.isIntersecting
-            else if (e.isIntersecting) hits.add(e.target)
+            if (e.isIntersecting) hits.add(e.target)
             else hits.delete(e.target)
           }
-          paint()
+          header.toggleAttribute('data-solid', hits.size === 0)
         },
         { rootMargin },
       )
       document.querySelectorAll('[data-band="dark"]').forEach((el) => {
         if (!header.contains(el)) io!.observe(el)
       })
-      if (page) io.observe(page)
     }
     // the line moves only when the viewport's height or the header's changes
     let lastH = window.innerHeight

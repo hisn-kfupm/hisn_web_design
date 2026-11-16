@@ -191,19 +191,13 @@
 
 /* ───────────────────────── redesign system (02-redesign §4) ───────────────────────── */
 
-/* Lenis (smooth scroll) — its required rules, inlined so no extra stylesheet loads */
-html.lenis, html.lenis body { block-size: auto; }
-.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
-.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
-.lenis.lenis-smooth iframe { pointer-events: none; }
-
-/* grain: a very subtle noise layer for dark bands (render <Grain/> inside a `relative` band) */
+/* grain: a very subtle noise layer for dark bands (inside a `relative` band). Revision 04 §3: no
+   blend mode (overlay on large bands was the main scroll jank), just a faint static texture. */
 @utility grain-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.09;
-  mix-blend-mode: overlay;
+  opacity: 0.045;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -211,23 +205,6 @@ html.lenis, html.lenis body { block-size: auto; }
 @utility band-dark {
   background-color: var(--color-deep);
   color: var(--color-white);
-}
-
-/* the page lifts off the fixed footer (FooterCurtain sets data-curtain and --footer-h) */
-.curtain-page {
-  position: relative;
-  z-index: 1;
-  background-color: var(--color-page);
-}
-[data-curtain="on"] .curtain-page {
-  margin-block-end: var(--footer-h, 0px);
-  box-shadow: 0 24px 48px -24px rgb(1 24 28 / 0.55);
-}
-[data-curtain="on"] .curtain-footer {
-  position: fixed;
-  inset-inline: 0;
-  bottom: 0;
-  z-index: 0;
 }
 
 /* the hairline as the scroll-progress bar: grows from the inline-start with page scroll */
@@ -375,122 +352,98 @@ html[data-menu="open"] .site-header {
 }
 .mobile-panel .drop-in > * { animation-delay: calc(var(--i, 0) * 45ms + 160ms); }
 
-/* hero «الجدار الحي»: the mint brick and its word. Without JS the brick still drops (late, in
-   CSS); HeroStage sets data-motion and drives it with GSAP; reduced motion shows it in place. */
+/* hero (revision 04 §4.1): the wall lays itself in course by course from the bottom (--k), then
+   the mint «لبنة» brick drops into the slogan, the word turns deep as it lands, the lines take the
+   knock and two chips fly off. CSS only, once; the global reduced-motion rule ends every animation
+   at once, so the composed state shows. Transform and opacity only. */
+.mosaic { --mg: 4px; }
+@media (min-width: 64rem) {
+  .mosaic { --mg: 6px; }
+}
+.mosaic-crenels { block-size: calc(var(--course) * 0.6); margin-block-end: var(--mg); }
+.mosaic-brick {
+  animation: brick-lay 0.55s var(--ease-drop) both;
+  animation-delay: calc(var(--k, 0) * 85ms + 120ms);
+}
+@keyframes brick-lay {
+  from { opacity: 0; transform: translateY(-32px); }
+  to { opacity: 1; transform: none; }
+}
+.mosaic-tone {
+  display: grid;
+  place-items: center;
+  padding-inline: 6px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), inset 0 -2px 0 rgb(0 0 0 / 0.18);
+  transition: background-color 0.3s var(--ease-settle), color 0.3s var(--ease-settle);
+}
+.mosaic-tone[data-tone="0"] { background-color: var(--color-deep-700); }
+.mosaic-tone[data-tone="1"] { background-color: var(--color-mid); }
+.mosaic-tone[data-tone="2"] { background-color: var(--color-teal-800); }
+.mosaic-tone[data-tone="3"] { background-color: var(--color-deep-600); }
+.mosaic-label {
+  display: none;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  font-weight: 600;
+  text-align: center;
+  text-wrap: balance;
+  color: rgb(220 233 235 / 0.72);
+}
+@media (min-width: 64rem) {
+  .mosaic-label { display: block; font-size: 0.8125rem; }
+}
+.mosaic-tone[data-lit] { background-color: var(--color-teal); }
+.mosaic-tone[data-lit] .mosaic-label { color: #fff; }
+.mosaic-tone[data-picked] { background-color: var(--color-mint); }
+.mosaic-tone[data-picked] .mosaic-label { color: var(--color-deep); }
+.mosaic-socket { box-shadow: inset 0 0 0 1.5px rgb(95 212 170 / 0.45), inset 0 6px 12px rgb(0 0 0 / 0.35); background-color: rgb(1 24 28 / 0.55); }
+.mosaic-photo .photo { position: absolute; inset: 0; }
+
 .hero-mint {
-  box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.5), inset 0 -4px 0 #43977B, 0 18px 30px -12px rgb(0 8 10 / 0.7);
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.5), inset 0 -4px 0 #43977B;
   transform-origin: 50% 100%;
-  will-change: transform;
-  animation: mint-fallback 0.6s var(--ease-drop) 2.2s both;
+  animation: mint-drop 0.75s var(--ease-drop) 0.95s both;
 }
-.hero-word {
-  color: var(--color-deep);
-  animation: word-fallback 0.6s linear 2.2s both;
-}
-.hero[data-motion] .hero-mint,
-.hero[data-motion] .hero-word {
-  animation: none;
-}
-@keyframes mint-fallback {
-  from { transform: translateY(-600%); }
+.hero-word { animation: word-land 0.75s linear 0.95s both; }
+.hero-title [data-line] { animation: line-knock 0.45s var(--ease-settle) 1.38s both; }
+@keyframes mint-drop {
+  from { transform: translateY(-700%) scaleY(1.1); }
   to { transform: none; }
 }
-@keyframes word-fallback {
+@keyframes word-land {
   0%, 57% { color: #fff; }
   58%, 100% { color: var(--color-deep); }
 }
-/* the mint brick lifts a little under the pointer (translate, so GSAP's transform stays its own) */
-.hero-mint { transition: translate 0.35s var(--ease-settle), box-shadow 0.35s var(--ease-settle); }
-@media (hover: hover) and (pointer: fine) {
-  [data-hero-brick]:hover .hero-mint { translate: 0 -3px; }
+@keyframes line-knock {
+  0% { transform: none; }
+  20% { transform: translateY(4px); }
+  100% { transform: none; }
+}
+/* two chips knocked off at impact, from the brick's lower corners */
+.hero-dust::before,
+.hero-dust::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0.02em;
+  inline-size: 0.09em;
+  block-size: 0.09em;
+  background-color: var(--color-mint);
+  opacity: 0;
+  animation: chip 0.6s var(--ease-settle) 1.38s both;
+}
+.hero-dust::before { inset-inline-start: -0.04em; --cx: 0.35em; }
+.hero-dust::after { inset-inline-end: -0.04em; --cx: -0.35em; }
+[dir="rtl"] .hero-dust::before { --cx: -0.35em; }
+[dir="rtl"] .hero-dust::after { --cx: 0.35em; }
+@keyframes chip {
+  0% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translate(var(--cx), -0.3em) rotate(40deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-dust { display: none; }
 }
 
 /* ───────────────────────── homepage sections (02-redesign §5.2–5.7) ───────────────────────── */
-
-/* §5.2 the three verbs: outline → solid through background-clip: text. --fill (0–1) is the share
-   filled from the inline-start, with a mint front. Default 1, so without JS the words are solid. */
-@property --fill {
-  syntax: "<number>";
-  inherits: false;
-  initial-value: 1;
-}
-@utility text-verb {
-  font-size: clamp(5rem, 0.5rem + 19vw, 11rem);
-  line-height: 1.2;
-  font-weight: 700;
-  @media (min-width: 64rem) {
-    font-size: clamp(5rem, 0.4rem + 10.6vw, 11rem);
-  }
-}
-.verb-word {
-  position: relative;
-  display: inline-block;
-  padding-block: 0.08em 0.14em; /* room for the shadda and descenders inside the clipped background */
-  color: transparent;
-  background-image: linear-gradient(
-    to left,
-    #fff calc(var(--fill) * 108% - 8%),
-    var(--color-mint) calc(var(--fill) * 108% - 4%),
-    rgb(255 255 255 / 0.035) calc(var(--fill) * 108%)
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-}
-/* the outline: -webkit-text-stroke draws every glyph's own contour, so the joins of connected
-   Arabic show seams inside the word. Instead a copy of the word (data-text) goes through an SVG
-   filter (VerbsStage's #verb-hollow) that keeps only a ring around the joined shape. */
-.verb-word::before {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  padding-block: inherit;
-  color: #fff;
-  filter: url(#verb-hollow);
-  pointer-events: none;
-}
-[dir="ltr"] .verb-word { background-image: linear-gradient(to right, #fff calc(var(--fill) * 108% - 8%), var(--color-mint) calc(var(--fill) * 108% - 4%), rgb(255 255 255 / 0.035) calc(var(--fill) * 108%)); }
-.verb-num {
-  border: 1.5px solid var(--color-green);
-  background-color: var(--color-green);
-  color: #fff;
-  transition: background-color 0.35s var(--ease-settle), color 0.35s var(--ease-settle), border-color 0.35s var(--ease-settle), transform 0.5s var(--ease-drop);
-}
-/* while the motion runs, a square is outlined until its verb is half filled */
-[data-verb]:has(.verb-word[style*="--fill"]) .verb-num:not([data-on]) {
-  background-color: transparent;
-  border-color: rgb(95 212 170 / 0.45);
-  color: var(--color-mint);
-}
-.verb-num[data-on] { animation: num-thud 0.5s var(--ease-drop); }
-@keyframes num-thud {
-  0% { transform: translateY(-8px); }
-  100% { transform: none; }
-}
-.verb-mortar {
-  background-image: linear-gradient(to left, rgb(95 212 170 / 0.7), rgb(95 212 170 / 0.08));
-  transform-origin: var(--start) 50%;
-}
-.verbs-glow {
-  background: radial-gradient(50% 60% at 85% 30%, rgb(3 96 109 / 0.55), transparent 70%), radial-gradient(40% 50% at 10% 90%, rgb(95 212 170 / 0.07), transparent 70%);
-}
-
-/* §5.3 the band of majors */
-@utility text-marquee {
-  font-size: clamp(2.375rem, 0.9rem + 5.6vw, 6.25rem);
-  line-height: 1.32;
-  font-weight: 700;
-}
-.marquee-solid { color: var(--color-deep); }
-/* stroke under fill: the page-coloured fill covers the stroke's inner half, which hides the seams
-   where joined Arabic glyphs overlap, and leaves a clean 1.5px outline outside */
-.marquee-outline { color: var(--color-page); -webkit-text-stroke: 3px var(--color-teal); paint-order: stroke fill; }
-.marquee-sq {
-  inline-size: 0.16em;
-  block-size: 0.16em;
-  font-size: clamp(2.375rem, 0.9rem + 5.6vw, 6.25rem);
-  background-color: var(--color-green);
-}
-.marquee-outline .marquee-sq { background-color: transparent; outline: 1.5px solid var(--color-teal); outline-offset: -1.5px; }
 
 /* §5.4 the events timetable: teal fills the row from the inline-start on hover or focus */
 .tt-fill {
@@ -525,86 +478,55 @@ html[data-menu="open"] .site-header {
 /* while LayCourses waits to lay a row, its meter shows empty, then fills on data-reveal */
 .timetable[data-armed] .seat-meter:not([data-reveal]) .seat-brick[data-on] { opacity: 0.18; }
 
-/* §5.5 departments: index + live preview */
-.dept-n {
-  border: 1.5px solid var(--color-teal-300);
-  color: var(--color-teal);
-  transition: background-color 0.3s var(--ease-settle), color 0.3s var(--ease-settle), border-color 0.3s var(--ease-settle);
+/* homepage cards (revision 04 §4.3–4.5) */
+/* a native snap row on phones and tablets (layered, so a section's sm:/lg: grid utilities win) */
+@layer components {
+  .snap-row {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    margin-inline: -20px;
+    padding-inline: 20px;
+    scroll-padding-inline: 20px;
+  }
+  .snap-row::-webkit-scrollbar { display: none; }
+  .snap-row > .snap-item { flex: 0 0 min(82vw, 22rem); scroll-snap-align: start; }
+  @media (min-width: 40rem) {
+    .snap-row { margin-inline: -32px; padding-inline: 32px; scroll-padding-inline: 32px; }
+  }
 }
-.dept-name { transition: color 0.3s var(--ease-settle), translate 0.5s var(--ease-settle); }
-.dept-go { opacity: 0; translate: calc(var(--dir) * -12px) 0; transition: opacity 0.3s var(--ease-settle), translate 0.45s var(--ease-settle); }
-@media (min-width: 64rem) {
-  .dept-item[data-active] .dept-n { background-color: var(--color-green); border-color: var(--color-green); color: #fff; }
-  .dept-item[data-active] .dept-name { color: var(--color-teal); translate: calc(var(--dir) * 10px) 0; }
-  .dept-item[data-active] .dept-go { opacity: 1; translate: 0 0; }
-  .dept-list:hover .dept-item:not([data-active]) .dept-name { color: var(--color-deep-300); }
+/* a Photo that fills a sized box (its own ratio box gives way) */
+.photo.photo-fill { position: absolute; inset: 0; }
+/* event card: lifts a little; the title's underline draws */
+.ev-card { box-shadow: 0 1px 0 var(--color-line); transition: transform 0.4s var(--ease-settle), box-shadow 0.4s var(--ease-settle); }
+.ev-card:has(:focus-visible) { transform: translateY(-4px); box-shadow: 0 18px 30px -20px rgb(2 44 51 / 0.45); }
+.ev-card :focus-visible { outline-offset: 4px; }
+@media (hover: hover) and (pointer: fine) {
+  .ev-card:hover { transform: translateY(-4px); box-shadow: 0 18px 30px -20px rgb(2 44 51 / 0.45); }
 }
-@media (max-width: 63.99rem) {
-  .dept-item[data-open] .dept-n { background-color: var(--color-green); border-color: var(--color-green); color: #fff; }
+/* department tiles, desktop with a mouse: the summary waits under the name and slides up on hover
+   or focus (the photo zooms through Photo's own hover rule) */
+@media (hover: hover) and (pointer: fine) and (min-width: 64rem) {
+  .dept-tile { display: block; }
+  .dept-tile .dept-panel {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 10;
+    transform: translateY(calc(100% - 4.25rem));
+    transition: transform 0.5s var(--ease-settle);
+  }
+  .dept-tile .dept-sum { opacity: 0; transition: opacity 0.3s linear; }
+  .dept-tile:is(:hover, :focus-within) .dept-panel { transform: none; }
+  .dept-tile:is(:hover, :focus-within) .dept-sum { opacity: 1; }
 }
-.dept-plus::before,
-.dept-plus::after {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  top: calc(50% - 1px);
-  block-size: 2px;
-  background-color: currentColor;
-  transition: transform 0.4s var(--ease-settle);
-}
-.dept-plus::after { transform: rotate(90deg); }
-[aria-expanded="true"] .dept-plus::after { transform: rotate(0deg); }
-[aria-expanded="true"].dept-toggle { background-color: var(--color-teal); color: #fff; }
-.dept-detail { grid-template-rows: 0fr; transition: grid-template-rows 0.5s var(--ease-settle); }
-.dept-item[data-open] .dept-detail { grid-template-rows: 1fr; }
-.dept-ghost { color: var(--color-deep); -webkit-text-stroke: 3px rgb(95 212 170 / 0.55); paint-order: stroke fill; }
-/* the panel's crenellated top: page-coloured gaps cut into the deep tower */
-.dept-crenel {
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  block-size: var(--sq);
-  background-image: repeating-linear-gradient(to left, var(--color-box) 0 var(--sq), transparent var(--sq) calc(var(--sq) * 2));
-  z-index: 2;
-}
-.dept-panel [data-cell] { transform-origin: 50% 50%; }
-
-/* §5.6 the talent invitation */
-.talent-glow {
-  background: radial-gradient(55% 60% at 12% 85%, rgb(3 96 109 / 0.6), transparent 70%), radial-gradient(35% 40% at 90% 10%, rgb(95 212 170 / 0.08), transparent 70%);
-}
-.talent-brick {
-  position: relative;
-  background-color: var(--color-mid);
-  border-top: 4px solid rgb(95 212 170 / 0.25);
-  transition: border-color 0.4s var(--ease-settle), background-color 0.4s var(--ease-settle), transform 0.6s var(--ease-drop);
-}
-.talent-node {
-  border: 1.5px solid rgb(95 212 170 / 0.5);
-  color: var(--color-mint);
-  background-color: var(--color-deep);
-  transition: background-color 0.35s var(--ease-settle), color 0.35s var(--ease-settle);
-}
-.talent-brick[data-lit] { border-top-color: var(--color-mint); background-color: var(--color-teal-800); transform: translateY(-4px); }
-.talent-brick[data-lit] .talent-node { background-color: var(--color-mint); border-color: var(--color-mint); color: var(--color-deep); }
-.talent-cta[data-lit] { box-shadow: 0 0 0 6px rgb(95 212 170 / 0.18); }
-.talent-cta { transition: box-shadow 0.5s var(--ease-settle), color 0.34s var(--ease-settle), border-color 0.34s var(--ease-settle); }
-
-/* §5.7 the recordings strip */
-.drag-viewport { scrollbar-width: none; scroll-snap-type: x mandatory; }
-.drag-viewport::-webkit-scrollbar { display: none; }
-.drag-viewport [data-card] { scroll-snap-align: start; scroll-margin-inline: max(20px, calc((100vw - 1200px) / 2)); }
-.drag-strip[data-drag] .drag-viewport { overflow: hidden; scroll-snap-type: none; }
-.drag-strip[data-drag] .drag-track { touch-action: pan-y; user-select: none; }
-.rec-tilt { transform-origin: 50% 100%; box-shadow: 0 1px 0 var(--color-line); transition: box-shadow 0.4s var(--ease-settle), translate 0.45s var(--ease-settle); }
-.rec-card:is(:hover, :focus-within) .rec-tilt { translate: 0 -6px; box-shadow: 0 22px 34px -22px rgb(2 44 51 / 0.45); }
-.rec-wall { transition: transform 1.2s var(--ease-settle); }
-.rec-card:is(:hover, :focus-within) .rec-wall { transform: scale(1.06); }
-.rec-play { transition: inline-size 0.45s var(--ease-settle), block-size 0.45s var(--ease-settle); }
-.rec-card:is(:hover, :focus-within) .rec-play { inline-size: 4.5rem; block-size: 4.5rem; }
-.rec-card:focus-within :focus-visible { outline-offset: 4px; }
-.dept-panel [data-icon] svg { stroke-width: 1.1; }
-.rec-hole svg { stroke-width: 1.35; }
+.next-card .next-go { transition: background-color 0.3s var(--ease-settle), color 0.3s var(--ease-settle); }
+.next-card:is(:hover, :focus-within) .next-go { background-color: var(--color-mint); color: var(--color-deep); }
+.rec-play { transition: transform 0.45s var(--ease-settle); transform-origin: var(--start) 100%; }
+article:is(:hover, :focus-within) > div > .rec-play { transform: scale(1.15); }
 
 /* §6 /events, the calendar (D1-10) */
 /* head: the month drops in again whenever it changes (keyed in CalendarHead) */

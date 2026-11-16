@@ -2,29 +2,29 @@
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { CustomEase } from 'gsap/CustomEase'
-import { SplitText } from 'gsap/SplitText'
-import { Flip } from 'gsap/Flip'
-import { Observer } from 'gsap/Observer'
-import { Draggable } from 'gsap/Draggable'
-import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin'
-import { InertiaPlugin } from 'gsap/InertiaPlugin'
 import { useGSAP } from '@gsap/react'
 import { EASE_PATHS } from './eases'
 
 let registered = false
 
 /**
- * Registers the GSAP plugins and the custom eases once (MotionProvider calls it; components that
- * animate on mount may call it too, it is idempotent). Browser only.
+ * Registers the GSAP plugins and the custom eases once. Every component that animates with GSAP
+ * calls it at the top of its useGSAP callback (it is idempotent). Browser only.
+ *
+ * Revision 04 §3: only the plugins still in use are registered, and nothing in the layout imports
+ * this module, so pages whose motion is CSS and IntersectionObserver (the homepage) ship no GSAP.
+ * SplitText, Flip, Observer, Draggable, DrawSVG and Inertia went with the pinned verbs, the drag
+ * strip, the department dissolve and the stepped talent course; import one here again if a new
+ * feature truly needs it.
  */
 export function registerMotion() {
   if (registered || typeof window === 'undefined') return
   registered = true
-  gsap.registerPlugin(useGSAP, ScrollTrigger, CustomEase, SplitText, Flip, Observer, Draggable, DrawSVGPlugin, InertiaPlugin)
+  gsap.registerPlugin(useGSAP, ScrollTrigger, CustomEase)
   for (const [name, path] of Object.entries(EASE_PATHS)) CustomEase.create(name, path)
   gsap.defaults({ ease: 'settle', duration: 0.6 })
   // phones: the address bar collapsing must not trigger a full refresh mid-scroll
   ScrollTrigger.config({ ignoreMobileResize: true })
 }
 
-export { gsap, ScrollTrigger, CustomEase, SplitText, Flip, Observer, Draggable, DrawSVGPlugin, InertiaPlugin, useGSAP }
+export { gsap, ScrollTrigger, CustomEase, useGSAP }
