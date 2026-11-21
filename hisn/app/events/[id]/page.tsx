@@ -14,6 +14,7 @@ import { TalentBand } from '@/components/home/TalentBand'
 import { Icon } from '@/components/ui/Icon'
 import { getSession } from '@/lib/auth/session-stub'
 import { deptIcon } from '@/lib/data/dept-icons'
+import { eventCover } from '@/lib/data/images'
 import { registerAction, joinWaitlistAction, cancelAction } from '@/lib/events/actions-stub'
 import { calendarStatus } from '@/lib/events/calendar-status'
 import { eventIcs, icsHref } from '@/lib/events/ics'
@@ -93,11 +94,15 @@ async function EventView({ params }: { params: Params }) {
   const live = state !== 'cancelled' && state !== 'ended'
   const place = event.format === 'online' ? t('event.format.online') : (event.location ?? t('event.format.inPerson'))
   const paragraphs = event.description.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+  const coverImage = eventCover(event)
+  const cover = { src: coverImage.src, blurDataURL: coverImage.remote ? undefined : coverImage.blurDataURL }
 
   return (
     <>
       <PageHead
         size="title"
+        crumbs={[{ href: '/', label: t('crumbs.home') }, { href: '/events', label: t('nav.events') }, { label: event.title }]}
+        backdrop={cover}
         kicker={
           dept ? (
             <span className="inline-flex items-center gap-2.5 text-[0.9375rem]">

@@ -47,6 +47,7 @@ export function CalendarHead({ month, now, count, eventDays }: Props) {
 
   return (
     <PageHead
+      crumbs={[{ href: '/', label: t('crumbs.home') }, { label: t('nav.events') }]}
       kicker={t('nav.events')}
       size="display"
       title={

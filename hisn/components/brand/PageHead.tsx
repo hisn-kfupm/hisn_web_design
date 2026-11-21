@@ -16,6 +16,8 @@ type Props = {
   crumbs?: Crumb[]
   /** a photo on the inline-end side (under the text on phones); makes the head shorter */
   photo?: { image: { src: string; blurDataURL?: string }; alt: string }
+  /** a photo behind the whole head under a dark scrim (pages whose inline-end side is taken, like an event's register block) */
+  backdrop?: { src: string; blurDataURL?: string }
   children?: ReactNode
   className?: string
 }
@@ -26,7 +28,7 @@ type Props = {
  * bottom. data-band="dark" keeps the header transparent over it. With a photo the head becomes a
  * two-column band and drops some of its height.
  */
-export function PageHead({ kicker, figure, title, size = 'h1', crumbs, photo, children, className }: Props) {
+export function PageHead({ kicker, figure, title, size = 'h1', crumbs, photo, backdrop, children, className }: Props) {
   const text = (
     <div>
       {kicker && (
@@ -42,6 +44,12 @@ export function PageHead({ kicker, figure, title, size = 'h1', crumbs, photo, ch
   )
   return (
     <section data-band="dark" className={cn('bg-brand on-dark relative overflow-hidden text-white', className)}>
+      {backdrop && (
+        <div aria-hidden="true" className="absolute inset-0 isolate">
+          <Photo image={backdrop} alt="" ratio="16/9" tone="dark" priority reveal={false} className="photo-fill" sizes="100vw" />
+          <div className="head-scrim absolute inset-0 z-[2]" />
+        </div>
+      )}
       <div aria-hidden="true" className="grain-layer" />
       <div className={cn('wrap relative', photo ? 'pt-[calc(var(--header-h)+1.75rem)] pb-28 lg:pt-[calc(var(--header-h)+2.5rem)] lg:pb-32' : 'pt-[calc(var(--header-h)+2.5rem)] pb-40 lg:pt-[calc(var(--header-h)+4rem)] lg:pb-44')}>
         {crumbs && <Breadcrumbs items={crumbs} />}
