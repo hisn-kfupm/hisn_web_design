@@ -76,7 +76,7 @@ function ListRow({ event, left, now }: { event: PublicEvent; left: number | null
         <h4 className={cn('text-[1.125rem] leading-[1.5] font-bold', status === 'cancelled' && 'line-through decoration-2')}>
           <Link href={`/events/${event.id}`} className={cn('tt-ink no-underline after:absolute after:inset-0 after:z-10', quiet ? 'text-muted' : 'text-deep')}>
             {event.title}
-            <span className="sr-only">{`، ${formatRiyadh(event.startsAt, 'datetime')}`}</span>
+            <span className="sr-only">{t('a11y.when', { when: formatRiyadh(event.startsAt, 'datetime') })}</span>
           </Link>
         </h4>
         <p className="tt-soft text-small text-muted">{formatRiyadhTimeRange(event.startsAt, event.endsAt)}</p>

@@ -54,7 +54,7 @@ export function EventCard({ event, variant }: Props) {
               className={cn('no-underline after:absolute after:inset-0 hover:underline', cancelled ? 'text-muted' : 'text-deep')}
             >
               {event.title}
-              <span className="sr-only">{`، ${formatRiyadh(event.startsAt, 'date')}`}</span>
+              <span className="sr-only">{t('a11y.when', { when: formatRiyadh(event.startsAt, 'date') })}</span>
             </Link>
           </h3>
           <ul className="m-0 flex list-none flex-col gap-0.5 p-0 text-small text-muted">

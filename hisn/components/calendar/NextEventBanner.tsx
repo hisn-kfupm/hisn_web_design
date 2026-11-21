@@ -25,7 +25,7 @@ export function NextEventBanner({ event }: { event: PublicEvent }) {
             </Link>
           </h2>
           <p className="mt-2 text-small text-on-dark sm:text-body">
-            {formatRiyadh(event.startsAt, 'weekday')}، {formatRiyadh(event.startsAt, 'date')}
+            {t('event.weekdayDate', { weekday: formatRiyadh(event.startsAt, 'weekday'), date: formatRiyadh(event.startsAt, 'date') })}
             <span aria-hidden="true" className="mx-2 text-mint/60">■</span>
             {formatRiyadh(event.startsAt, 'time')}
             {event.departmentCode && (

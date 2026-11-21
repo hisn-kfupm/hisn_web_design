@@ -86,6 +86,8 @@
   "event.format.inPerson": "حضوري «مؤقت»",
   "event.seats.open": "التسجيل مفتوح «مؤقت»",
   "event.badge.almostFull": "المقاعد شارفت على الاكتمال!",
+  "event.weekdayDate": "{weekday}، {date}",
+  "a11y.when": "، {when}",
   "event.card.details": "التفاصيل والتسجيل «مؤقت»",
   "event.badge.ended": "انتهت",
   "event.badge.cancelled": "أُلغيت",

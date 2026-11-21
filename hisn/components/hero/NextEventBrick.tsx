@@ -27,7 +27,7 @@ export function NextEventBrick({ event }: { event: PublicEvent | null }) {
             <h3 className="mt-1 line-clamp-2 text-[1.0625rem] leading-[1.5] font-bold">
               <Link href={`/events/${event.id}`} className="text-white no-underline after:absolute after:inset-0">
                 <span className="draw-line pb-0.5">{event.title}</span>
-                <span className="sr-only">{`، ${formatRiyadh(event.startsAt, 'datetime')}`}</span>
+                <span className="sr-only">{t('a11y.when', { when: formatRiyadh(event.startsAt, 'datetime') })}</span>
               </Link>
             </h3>
             <p className="mt-1 truncate text-small text-on-dark">

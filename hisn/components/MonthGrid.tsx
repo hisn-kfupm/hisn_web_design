@@ -130,7 +130,7 @@ function EventBrick({ event, left, now }: { event: PublicEvent; left: number | n
         <h3 className="cal-title line-clamp-3 text-[0.9375rem] leading-[1.5] font-bold">
           <Link href={`/events/${event.id}`} className="text-inherit no-underline after:absolute after:inset-0 after:z-10">
             {event.title}
-            <span className="sr-only">{`، ${formatRiyadh(event.startsAt, 'datetime')}`}</span>
+            <span className="sr-only">{t('a11y.when', { when: formatRiyadh(event.startsAt, 'datetime') })}</span>
           </Link>
         </h3>
         {event.departmentCode && (

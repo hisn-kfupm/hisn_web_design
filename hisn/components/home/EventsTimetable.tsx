@@ -79,7 +79,7 @@ function TimetableRow({ event, taken }: { event: PublicEvent; taken: number | nu
           <h3 className="text-[1.1875rem] leading-[1.5] font-bold lg:text-[1.5rem] lg:leading-[1.45]">
             <Link href={`/events/${event.id}`} className="tt-ink text-deep no-underline after:absolute after:inset-0 after:z-10">
               {event.title}
-              <span className="sr-only">{`، ${formatRiyadh(event.startsAt, 'datetime')}`}</span>
+              <span className="sr-only">{t('a11y.when', { when: formatRiyadh(event.startsAt, 'datetime') })}</span>
             </Link>
           </h3>
           <p className="tt-soft mt-1 text-small text-muted">{formatRiyadhTimeRange(event.startsAt, event.endsAt)}</p>
