@@ -2,9 +2,14 @@
 
 /**
  * dev-1 D1-3's pattern, also matched after a variant (`lg:pl-6`, `rtl:ml-2`) or a leading `!`.
- * `-?` catches negative margins; `(-|\s|$)` keeps `place-*`, `prose` and `border-line` legal.
+ * `-?` catches negative margins; `(-|\s|$|\/)` keeps `place-*`, `prose` and `border-line` legal
+ * and still ends a gradient with an interpolation modifier (`bg-linear-to-r/oklch`).
+ * Besides margins, padding, insets, borders, floats and text alignment it covers transform origins
+ * (`origin-right`), gradient directions (`bg-linear-to-r`), single corners (`rounded-tl-*`) and
+ * scroll offsets (`scroll-ml-*`), which flip just as badly when the page turns English.
  */
-const PHYSICAL = /(^|[\s:!])-?(m[lr]|p[lr]|left|right|rounded-[lr]|border-[lr]|float-(left|right)|text-(left|right))(-|\s|$)/
+const PHYSICAL =
+  /(^|[\s:!])-?(m[lr]|p[lr]|left|right|rounded-[lr]|rounded-(tl|tr|bl|br)|border-[lr]|float-(left|right)|text-(left|right)|origin-((top|bottom)-)?(left|right)|bg-(linear|gradient)-to-(l|r|tl|tr|bl|br)|scroll-[mp][lr])(-|\s|$|\/)/
 
 /** helpers whose string arguments are class lists */
 const CLASS_HELPERS = new Set(['cn', 'clsx', 'cx', 'twMerge', 'cva', 'tv'])
@@ -24,7 +29,9 @@ function offendingClass(text, match) {
 
 /**
  * No physical (left/right) Tailwind classes; use the logical ones: ms-/me-, ps-/pe-, start-/end-,
- * text-start/text-end, rounded-s/e, border-s/e.
+ * text-start/text-end, rounded-s/e (corners rounded-ss/se/es/ee), border-s/e, scroll-ms/me, and
+ * origin-(--start) for a transform origin on the inline-start edge. A gradient that runs along the
+ * line goes in CSS with `linear-gradient(var(--to-end), …)` (app/globals.css).
  * Checks every string inside a `className` (or `*ClassName`) prop or property, and inside calls
  * to cn(), clsx() and similar helpers anywhere.
  *
@@ -37,7 +44,7 @@ module.exports = {
     schema: [],
     messages: {
       physical:
-        '`{{cls}}` is a left/right class. Use the logical one (ms-/me-, ps-/pe-, start-/end-, text-start/end, rounded-s/e, border-s/e).',
+        '`{{cls}}` is a left/right class. Use the logical one (ms-/me-, ps-/pe-, start-/end-, text-start/end, rounded-s/e or rounded-ss/se/es/ee, border-s/e, scroll-ms/me, origin-(--start)); put a sideways gradient in CSS with var(--to-end).',
     },
   },
   create(context) {

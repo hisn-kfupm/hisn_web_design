@@ -10,7 +10,11 @@
     "declaration-property-value-disallowed-list": {
       "text-align": ["left", "right"],
       "float": ["left", "right"],
-      "clear": ["left", "right"]
+      "clear": ["left", "right"],
+      "/^(-webkit-)?(background|background-image|mask|mask-image|border-image|border-image-source)$/": [
+        "/\\bto\\s+((top|bottom)\\s+)?(left|right)\\b/"
+      ],
+      "transform-origin": ["/\\b(left|right)\\b/"]
     }
   }
 }

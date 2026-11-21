@@ -23,6 +23,12 @@ describe('.stylelintrc.json', () => {
     'a{text-align:left}',
     'a{float:left}',
     'a{clear:right}',
+    'a{background-image:linear-gradient(to left,#fff,#000)}',
+    'a{background:linear-gradient(to right,#fff,#000)}',
+    'a{background-image:linear-gradient(to top left,#fff,#000)}',
+    'a{mask-image:linear-gradient(to right,#000,transparent)}',
+    'a{transform-origin:right center}',
+    'a{transform-origin:left}',
   ])('rejects %s', async (code) => {
     expect(await errored(code)).toBe(true)
   })
@@ -36,6 +42,12 @@ describe('.stylelintrc.json', () => {
     'a{text-align:start}',
     'a{float:inline-start}',
     'a{margin:0 auto}',
+    'a{background-image:linear-gradient(var(--to-end),#fff,#000)}',
+    'a{background-image:linear-gradient(to bottom,#fff,#000)}',
+    'a{background-image:linear-gradient(120deg,#fff,#000)}',
+    'a{transform-origin:var(--start) 50%}',
+    'a{transform-origin:50% 100%}',
+    ':root{--to-end:to left}',
   ])('accepts %s', async (code) => {
     expect(await errored(code)).toBe(false)
   })

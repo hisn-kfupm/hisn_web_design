@@ -25,5 +25,5 @@ Conventions (dev-1 "Rules for every task"): no literal UI text in components —
 | `hisn/no-literal-text` | Letters between JSX tags or in a string in braces; any letter in `alt`, `title`, `placeholder`, `aria-label`; Arabic letters in any other prop |
 | `hisn/no-supabase-name` | A variable, parameter or import named exactly `supabase` |
 | `hisn/talent-import` | Importing `@/lib/db/talent` anywhere except `app/talent/actions.ts` |
-| `hisn/no-physical-classes` | `ml-*`, `pr-*`, `left-*`, `text-right`, `rounded-l-*`, `border-r-*`, `float-left` and the like, also after a variant (`lg:pl-6`), in `className` props and in `cn()` calls |
-| Stylelint | `margin-left`, `padding-right`, `left`, `border-left` and their longhands, `left` or `right` as the value of `text-align`, `float` or `clear` |
+| `hisn/no-physical-classes` | `ml-*`, `pr-*`, `left-*`, `text-right`, `rounded-l-*`, `rounded-tl-*`, `border-r-*`, `float-left`, `origin-right`, `bg-linear-to-r`, `scroll-ml-*` and the like, also after a variant (`lg:pl-6`), in `className` props and in `cn()` calls. Use `origin-(--start)` for a transform origin on the inline-start edge |
+| Stylelint | `margin-left`, `padding-right`, `left`, `border-left` and their longhands; `left` or `right` as the value of `text-align`, `float` or `clear`; `to left`/`to right` in a background, mask or border-image gradient (write `linear-gradient(var(--to-end), …)`); `left`/`right` in `transform-origin` (write `var(--start)`) |

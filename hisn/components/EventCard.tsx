@@ -31,7 +31,7 @@ export function EventCard({ event, variant }: Props) {
       className={cn(
         'relative flex h-full flex-col border border-line bg-white',
         // the teal top edge draws in from the inline start on hover and focus
-        "before:absolute before:-inset-x-px before:-top-px before:z-10 before:h-0.5 before:scale-x-0 before:bg-teal before:transition-transform before:duration-200 before:ease-brand before:content-[''] focus-within:before:scale-x-100 hover:before:scale-x-100 ltr:before:origin-left rtl:before:origin-right",
+        "before:absolute before:-inset-x-px before:-top-px before:z-10 before:h-0.5 before:scale-x-0 before:bg-teal before:transition-transform before:duration-200 before:ease-brand before:content-[''] focus-within:before:scale-x-100 hover:before:scale-x-100 before:origin-(--start)",
       )}
     >
       {variant === 'recording' && <EventImage imageUrl={event.imageUrl} departmentCode={event.departmentCode} />}

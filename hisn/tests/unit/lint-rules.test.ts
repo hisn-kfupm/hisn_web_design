@@ -99,6 +99,9 @@ describe('hisn/no-physical-classes', () => {
       page(`<div className="place-items-center prose rtl:-scale-x-100 max-[359px]:sr-only" />`),
       page(`<div className={cn('flex', side === 'left' && 'ms-2')} />`),
       page(`const edge = 'left'`),
+      // logical forms of the utilities below: the inline-start variable, symmetric directions, logical corners
+      page(`<div className="before:origin-(--start) origin-center origin-top origin-bottom" />`),
+      page(`<div className="bg-linear-to-t bg-linear-to-b bg-linear-120 rounded-t-lg rounded-ss-lg rounded-ee scroll-ms-4 scroll-pe-2 scroll-mt-4" />`),
     ],
     invalid: [
       { ...page(`<div className="ml-4 p-2" />`), errors: errors('physical') },
@@ -115,6 +118,15 @@ describe('hisn/no-physical-classes', () => {
       // class strings built outside JSX
       { ...page(`const c = cn('flex', 'pl-2')`), errors: errors('physical') },
       { ...page(`const props = { className: 'mr-2' }`), errors: errors('physical') },
+      // transform origins, gradient directions, corners and scroll offsets that point left or right
+      { ...page(`<div className="before:origin-right before:scale-x-0" />`), errors: errors('physical') },
+      { ...page(`<div className="ltr:before:origin-left" />`), errors: errors('physical') },
+      { ...page(`<div className="origin-top-left" />`), errors: errors('physical') },
+      { ...page(`<div className="bg-linear-to-r from-mint to-teal" />`), errors: errors('physical') },
+      { ...page(`<div className="bg-gradient-to-l" />`), errors: errors('physical') },
+      { ...page(`<div className="bg-linear-to-tr/oklch" />`), errors: errors('physical') },
+      { ...page(`<div className="rounded-tl-lg" />`), errors: errors('physical') },
+      { ...page(`<div className="scroll-ml-4" />`), errors: errors('physical') },
     ],
   })
 })

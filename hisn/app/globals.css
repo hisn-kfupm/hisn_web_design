@@ -118,11 +118,13 @@
   --sq: 16px;         /* battlement square */
   --dir: -1;          /* RTL: "forward" motion runs toward inline-end, i.e. negative X */
   --start: 100%;      /* the inline-start edge as a transform-origin x (RTL: the right edge) */
+  --to-end: to left;  /* a gradient direction from the inline start to the inline end (RTL: right to left) */
   --course: 30px;     /* height of one course of the hero wall; the canvas reads it */
 }
 [dir="ltr"] {
   --dir: 1;
   --start: 0%;
+  --to-end: to right;
 }
 @media (min-width: 48rem) {
   :root { --sq: 24px; --course: 36px; }
@@ -145,9 +147,9 @@
   background-repeat: no-repeat;
   background-size: 100% var(--plate-h);
 }
-/* the mint–teal hairline across the top of every page; mint sits at the RTL start (right) */
+/* the mint–teal hairline across the top of every page; mint sits at the inline start */
 @utility hairline {
-  background-image: linear-gradient(to left, #5FD4AA, #03606D);
+  background-image: linear-gradient(var(--to-end), #5FD4AA, #03606D);
 }
 
 @layer base {
@@ -877,6 +879,5 @@ a.cal-today:is(:hover, :focus-visible) { transform: translateY(-3px); box-shadow
 
 /* a page head over a photo (the event page): deep behind the text at the inline-start, letting the
    photo through toward the inline-end (PageHead backdrop) */
-.head-scrim { background: linear-gradient(to left, rgb(2 44 51 / 0.96) 0%, rgb(2 44 51 / 0.88) 45%, rgb(2 44 51 / 0.62) 100%); }
-[dir='ltr'] .head-scrim { background: linear-gradient(to right, rgb(2 44 51 / 0.96) 0%, rgb(2 44 51 / 0.88) 45%, rgb(2 44 51 / 0.62) 100%); }
+.head-scrim { background: linear-gradient(var(--to-end), rgb(2 44 51 / 0.96) 0%, rgb(2 44 51 / 0.88) 45%, rgb(2 44 51 / 0.62) 100%); }
 @media (width < 64rem) { .head-scrim { background: rgb(2 44 51 / 0.86); } }
