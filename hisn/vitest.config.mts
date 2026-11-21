@@ -4,7 +4,10 @@ import { fileURLToPath } from 'node:url'
 
 // dev-1 D1-1 asks for vitest.workspace.ts; Vitest 4 removed workspace files, so the same three
 // projects live here under `test.projects` (same names, globs and environments).
-const alias = { '@': fileURLToPath(new URL('./', import.meta.url)) }
+const alias = {
+  '@': fileURLToPath(new URL('./', import.meta.url)),
+  'server-only': fileURLToPath(new URL('./tests/stubs/server-only.ts', import.meta.url)),
+}
 
 export default defineConfig({
   plugins: [react()],
