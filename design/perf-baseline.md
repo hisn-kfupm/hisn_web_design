@@ -112,3 +112,26 @@ Homepage JS by chunk (gzip on the wire, 11 files, 252.9 KB):
 - The phone scroll is programmatic `scrollBy`, not a touch fling, so phone compositor stress is understated.
 - Two runs per row; run-to-run spread is shown as ranges. The home page was measured on the committed
   checkpoint, before the photos land.
+
+## After the revision (21 Nov 2026, branch `dev1/redesign-2`)
+
+Same method: production build, 4× slower CPU, 1280×800 wheel scroll, 375×812 touch scroll. The
+"before" column was re-measured with the same script on the checkpoint deployed at
+hisn-web-design.vercel.app, so both columns use identical flags.
+
+| homepage, 1280 | before (checkpoint) | after (this branch) |
+|---|---|---|
+| LCP (warm) | 816 ms | 230–250 ms |
+| CLS | 0.739 (3.6 after scrolling) | 0.001 |
+| TBT | 145–863 ms | 30–45 ms |
+| JS (gzip) | 259 KB | 165 KB |
+| page height | 8,662 px | 4,236 px |
+| weak-GPU scroll, frames over 50 ms | 24–41 frames, slowest 150–767 ms | none in warm runs, slowest 50 ms (cold first run: 9 frames, slowest 283 ms) |
+| normal scroll | smoothed by Lenis | 0.8% of frames over 20 ms, slowest 33 ms |
+
+Phone 375: page height 7,120 → 4,911 px, TBT 140 → 27 ms, CLS 0, no frame over 20 ms while scrolling.
+
+Percentages of slow frames are not comparable between the columns: Lenis stretched the old scroll
+over about 5,900 frames, against about 115 for native scrolling. Counts and the slowest frame are.
+The remaining 33 ms frames in weak-GPU mode come as photos enter the screen (decode and the teal
+grade); there are no long tasks.
