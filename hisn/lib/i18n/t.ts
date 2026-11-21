@@ -13,7 +13,10 @@ const DRAFT_MARKER = /\s?«مؤقت»/g
  * returned text; they stay in ar.json, so `npm run check:content` still lists them.
  */
 export function t(key: StringKey, vars?: Record<string, string | number>): string {
-  const text = strings[key].replace(/\{(\w+)\}/g, (_match, name: string) => {
+  const raw = strings[key]
+  // a key added to ar.json while `next dev` runs is not picked up by the server until a restart
+  if (raw === undefined) throw new Error(`unknown string key "${key}" (just added it to ar.json? restart next dev)`)
+  const text = raw.replace(/\{(\w+)\}/g, (_match, name: string) => {
     if (!vars || !(name in vars)) throw new Error(`missing var ${name} for key ${key}`)
     return String(vars[name])
   })

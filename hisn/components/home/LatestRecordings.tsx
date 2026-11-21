@@ -12,11 +12,22 @@ import { t, type StringKey } from '@/lib/i18n/t'
  * a mint play square), each one link to its place in the library (/library#recording-<id>, where
  * the library's cards carry that id), plus «المكتبة». Two columns on phones, four on desktop.
  */
-export function LatestRecordings({ number, recordings }: { number: number; recordings: PublicEvent[] }) {
+type Props = {
+  number: number
+  recordings: PublicEvent[]
+  /** defaults: the homepage's title, «المكتبة» link, empty text and test id */
+  title?: string
+  headId?: string
+  link?: { href: string; label: string }
+  emptyText?: string
+  testId?: string
+}
+
+export function LatestRecordings({ number, recordings, title, headId = 'recordings-title', link, emptyText, testId = 'recordings' }: Props) {
   return (
-    <section data-testid="recordings" aria-labelledby="recordings-title" className="bg-page py-14 lg:py-20">
+    <section data-testid={testId} aria-labelledby={headId} className="bg-page py-14 lg:py-20">
       <div className="wrap">
-        <SectionHead number={number} id="recordings-title" title={t('home.recordings.title')} link={{ href: '/library', label: t('home.recordings.all') }} />
+        <SectionHead number={number} id={headId} title={title ?? t('home.recordings.title')} link={link ?? { href: '/library', label: t('home.recordings.all') }} />
         {recordings.length > 0 ? (
           <ul className="m-0 grid list-none grid-cols-2 gap-x-4 gap-y-7 p-0 lg:grid-cols-4 lg:gap-x-6">
             {recordings.map((event) => (
@@ -40,7 +51,7 @@ export function LatestRecordings({ number, recordings }: { number: number; recor
             ))}
           </ul>
         ) : (
-          <p className="text-muted">{t('home.recordings.none')}</p>
+          <p className="text-muted">{emptyText ?? t('home.recordings.none')}</p>
         )}
       </div>
     </section>
