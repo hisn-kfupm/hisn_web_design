@@ -857,3 +857,12 @@ a.cal-today:is(:hover, :focus-visible) { transform: translateY(-3px); box-shadow
 @media print {
   .photo-cells { display: none; }
 }
+
+/* library cards (dev-1 D1-12): the play square grows on hover or focus; a card opened from a
+   /library#recording-<id> link is marked with a mint outline */
+.video-play { transition: transform 0.45s var(--ease-settle); transform-origin: var(--start) 100%; }
+.video-card:is(:hover, :focus-within) .video-play { transform: scale(1.12); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .video-card:hover .photo-img { transform: scale(1.04); }
+}
+.recording-item:target .video-card { outline: 3px solid var(--color-mint); outline-offset: 8px; }
