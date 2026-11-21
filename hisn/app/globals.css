@@ -866,3 +866,11 @@ a.cal-today:is(:hover, :focus-visible) { transform: translateY(-3px); box-shadow
   .video-card:hover .photo-img { transform: scale(1.04); }
 }
 .recording-item:target .video-card { outline: 3px solid var(--color-mint); outline-offset: 8px; }
+
+/* /talent: a short wall in running bond with one empty socket, the brick still to be laid */
+.socket-wall { display: grid; gap: 6px; inline-size: min(100%, 17rem); }
+.socket-row { display: flex; gap: 6px; }
+.socket-row:nth-child(2) { margin-inline-start: 2.1rem; }
+.socket-brick { flex: 0 0 auto; block-size: 2.25rem; inline-size: 4.25rem; background-color: var(--color-mid); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), inset 0 -2px 0 rgb(0 8 10 / 0.35); }
+.socket-brick:nth-child(odd) { background-color: var(--color-teal-800); }
+.socket-brick.is-empty { background: transparent; box-shadow: none; outline: 2px dashed var(--color-mint); outline-offset: -2px; }
