@@ -4,11 +4,15 @@ import { cn } from '@/lib/cn'
 
 export type PhotoRatio = '16/9' | '4/3' | '1/1' | '3/4'
 
-/** reveal grid per ratio: near-square cells, never more than 24 */
+/**
+ * reveal grid per ratio: near-square cells, at most 12 (brief: never more than 24). Fewer cells
+ * because each one is a composited layer while it fades: with up to 24 per photo, a desktop
+ * scroll past a row of photos dropped frames on a weak GPU (home2 perf notes).
+ */
 const GRID: Record<PhotoRatio, [cols: number, rows: number]> = {
-  '16/9': [5, 3],
+  '16/9': [4, 2],
   '4/3': [4, 3],
-  '1/1': [4, 4],
+  '1/1': [3, 3],
   '3/4': [3, 4],
 }
 

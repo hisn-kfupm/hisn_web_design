@@ -35,7 +35,7 @@ export const viewport: Viewport = { themeColor: '#022C33', colorScheme: 'light' 
 */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={plex.variable}>
+    <html lang="ar" dir="rtl" data-scroll-behavior="smooth" className={plex.variable}>
       <body className="antialiased">
         <SkipLink />
         <ProgressHairline />

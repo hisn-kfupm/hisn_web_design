@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react'
 import { prefersReducedMotion } from '@/lib/motion/useReducedMotion'
 
-const STEP_MS = 55
+const STEP_MS = 70
 const CELL_MS = 550
 
 /**

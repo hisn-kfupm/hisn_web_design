@@ -3,6 +3,12 @@
 **For:** the inner-page builders (D1-9 departments, D1-10 calendar, D1-11 event page, D1-12 library, D1-17 talent, 404, privacy, sign-in).
 **Read first:** `02-redesign.md` (brand rules, motion principles, banned patterns). This file lists what already exists in `hisn/` and how to put a page together with it. Don't re-create any of these.
 
+> **Revision 04 (homepage and shell rebuild) changed this kit; where the sections below disagree, this note wins.**
+> - **Gone:** Lenis and `useLenis` (native scroll; drop every `data-lenis-prevent`), `MotionProvider`, `FooterCurtain` and `html[data-curtain]`, the hero canvas (`HeroStage`, `wall-engine.ts`, `wall-layout.ts`, `PulledBrick`), `Verbs`/`VerbsStage`, `MajorsBand`/`MajorsMarquee`, `Departments`/`DeptIndex`, `RecordingsStrip`/`DragStrip`, `TalentStage`, `RecordingCover`.
+> - **GSAP:** `@/lib/motion/gsap` now exports only `gsap, ScrollTrigger, CustomEase, useGSAP, registerMotion` (eases unchanged). Nothing in the layout imports it, so call `registerMotion()` in every `useGSAP` callback; a page whose motion is CSS and IntersectionObserver ships no GSAP.
+> - **New, reusable:** `EventPhotoCard` (`components/home/EventPhotoCard.tsx`: the one event card, image → meta → title → action, `event`, `taken`, `sizes`), `.snap-row` / `.snap-item` (native snap row on phones; reset with `sm:`/`lg:` grid utilities), `.photo-fill` on `<Photo>` to fill a sized box, `SectionNumber size="head"`. `SectionHead` is compact now (number, ■■■ and title on one row).
+> - **Changed:** `TalentBand` is one split band (photo + deep block + one CTA) on the page colour, no `data-band`. The footer is compact, in normal flow, with `data-band="dark"`. `.grain-layer` has no blend mode. Photo reveal cells clear by opacity only, at most 12 per photo. `--header-h` is 64 px below 1024 px.
+
 ---
 
 ## 1. How to put an inner page together

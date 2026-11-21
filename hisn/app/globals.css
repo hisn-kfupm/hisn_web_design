@@ -113,7 +113,7 @@
 
 :root {
   color-scheme: light;
-  --header-h: 80px;
+  --header-h: 64px;   /* phones: a compact sticky bar (04 §6) */
   --plate-h: 960px;   /* one gradient canvas shared by the header and the page head, so they read as one plate */
   --sq: 16px;         /* battlement square */
   --dir: -1;          /* RTL: "forward" motion runs toward inline-end, i.e. negative X */
@@ -129,6 +129,11 @@
 }
 @media (min-width: 64rem) {
   :root { --header-h: 84px; --course: 40px; }
+}
+/* in-page anchors glide, except under reduced motion; Next turns it off during route changes
+   (data-scroll-behavior on <html>) */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
 }
 
 /* official gradient (guide p.13): 120°, teal → mid → deep, with a 22% mint glow */
@@ -840,14 +845,15 @@ a.cal-today:is(:hover, :focus-visible) { transform: translateY(-3px); box-shadow
   grid-template-rows: repeat(var(--rows, 3), 1fr);
   pointer-events: none;
 }
-/* the outline hides hairline seams between fractional cells */
+/* cells overlap by a pixel (negative margin, not a transform) so no hairline seams show. They
+   clear by opacity only: measured on the production build, a scale on ~24 promoted cells per
+   photo cost 7–12 % slow frames during a desktop scroll, opacity alone 2–3 % (home2 perf notes). */
 .photo-cells > i {
+  margin: -1px;
   background-color: var(--cell);
-  outline: 1px solid var(--cell);
-  transform: scale(1.02);
-  transition: transform 0.55s var(--ease-settle) var(--d, 0ms), opacity 0.4s linear var(--d, 0ms);
+  transition: opacity 0.5s var(--ease-settle) var(--d, 0ms);
 }
-.photo-cells[data-play] > i { transform: scale(0); opacity: 0; }
+.photo-cells[data-play] > i { opacity: 0; }
 @media print {
   .photo-cells { display: none; }
 }
