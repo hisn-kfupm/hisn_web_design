@@ -1,12 +1,27 @@
 import { describe, expect, it, vi } from 'vitest'
 import { act, render } from '@testing-library/react'
 import { renderToString } from 'react-dom/server'
+import { PageHead } from '@/components/brand/PageHead'
 import { Photo } from '@/components/ui/Photo'
 import { images } from '@/lib/data/images'
 
 const img = images.talent
 
 describe('Photo', () => {
+  it('has the brand grade layer unless the photo fills a large area', () => {
+    const graded = render(<Photo image={img} alt="" ratio="4/3" sizes="50vw" />).container
+    expect(graded.querySelector('.photo-grade')).not.toBeNull()
+    const plain = render(<Photo image={img} alt="" ratio="4/3" sizes="50vw" grade={false} />).container
+    expect(plain.querySelector('.photo-grade')).toBeNull()
+  })
+
+  it('puts no blend layer over a full-width page-head backdrop (brief 04 §3)', () => {
+    const { container } = render(<PageHead title="عنوان" backdrop={{ src: img.src, blurDataURL: img.blurDataURL }} />)
+    const backdrop = container.querySelector('.head-scrim')?.parentElement as HTMLElement
+    expect(backdrop.querySelector('img')).not.toBeNull()
+    expect(backdrop.querySelector('.photo-grade')).toBeNull()
+  })
+
   it('renders an img with the alt text and the sizes it is given', () => {
     const { container } = render(<Photo image={img} alt="نص بديل" ratio="4/3" sizes="(min-width: 1024px) 33vw, 100vw" />)
     const el = container.querySelector('img')!

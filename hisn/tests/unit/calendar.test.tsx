@@ -3,13 +3,15 @@ import { render, within } from '@testing-library/react'
 import { MonthGrid } from '@/components/MonthGrid'
 import { EventList } from '@/components/EventList'
 import { CalendarView } from '@/components/calendar/CalendarView'
+import { eventCover } from '@/lib/data/images'
 import { calendarStatus } from '@/lib/events/calendar-status'
 import { loadCalendar } from '@/lib/events/calendar'
 import { upcomingEvents } from '@/lib/events/queries'
 import type { PublicEvent } from '@/lib/events/types'
 import { t } from '@/lib/i18n/t'
 
-/* dev-1 D1-10: the calendar's grid, list, badges and next-event banner */
+/* dev-1 D1-10: the calendar's grid, list, badges and next-event banner; revision 04 §5 turns the
+   banner into a featured next-event card with a photo at the top and adds thumbnails to the list */
 const NOW = Date.parse('2026-11-15T09:00:00Z')
 
 const ev = (over: Partial<PublicEvent>): PublicEvent => ({
@@ -111,15 +113,36 @@ describe('EventList', () => {
     expect(row(1).querySelector('[data-testid="seat-meter"]')).not.toBeNull()
     expect(row(4).querySelector('[data-testid="seat-meter"]')).toBeNull()
   })
+
+  it('gives each row a small thumbnail of the event cover', () => {
+    const root = list()
+    for (const e of events) {
+      const img = root.querySelector(`[data-event="${e.id}"] img`) as HTMLImageElement
+      expect(img.getAttribute('alt')).toBe('')
+      expect(decodeURIComponent(img.getAttribute('srcset') ?? '')).toContain(eventCover(e).src)
+    }
+  })
 })
 
 describe('CalendarView', () => {
-  it('shows the next-event banner when given one, linking to it', () => {
+  it('features the next event with its photo, and links to its month when that is another month', () => {
     const next = ev({ id: 77, title: 'التالية', startsAt: '2026-12-02T15:00:00Z', endsAt: '2026-12-02T17:00:00Z' })
     const { container } = render(<CalendarView month="2026-10" events={[]} seatsLeft={new Map()} now={NOW} next={next} />)
     const banner = container.querySelector('[data-testid="next-banner"]') as HTMLElement
-    expect(within(banner).getAllByRole('link')[0].getAttribute('href')).toBe('/events/77')
+    expect(within(banner).getAllByRole('link').map((a) => a.getAttribute('href'))).toEqual(['/events/77', '/events?m=2026-12'])
+    expect(decodeURIComponent(banner.querySelector('img')?.getAttribute('srcset') ?? '')).toContain(eventCover(next).src)
     expect(container.textContent).toContain(t('calendar.empty'))
+  })
+
+  it('features the next event above the month even when the month still has events ahead', () => {
+    const { container } = render(<CalendarView month="2026-11" events={events} seatsLeft={seats} now={NOW} next={upcoming} />)
+    const banner = container.querySelector('[data-testid="next-banner"]') as HTMLElement
+    // the event is in the month on screen, so there is no "its month" link
+    expect(within(banner).getAllByRole('link').map((a) => a.getAttribute('href'))).toEqual(['/events/1'])
+    for (const id of ['month-grid', 'event-list']) {
+      const after = container.querySelector(`[data-testid="${id}"]`) as HTMLElement
+      expect(banner.compareDocumentPosition(after) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    }
   })
 
   it('omits the banner without a next event', () => {
@@ -135,11 +158,12 @@ describe('loadCalendar (stand-in)', () => {
   })
   afterAll(() => vi.useRealTimers())
 
-  it('has no banner for a month with an event still ahead', async () => {
+  it('features the next upcoming event even for a month with events still ahead', async () => {
+    const [first] = await upcomingEvents({ limit: 1 })
     const data = await loadCalendar('2026-11', new Date(NOW))
     expect(data.month).toBe('2026-11')
     expect(data.events.length).toBeGreaterThan(0)
-    expect(data.next).toBeNull()
+    expect(data.next?.id).toBe(first.id)
   })
 
   it('links a past or empty month to the next upcoming event', async () => {

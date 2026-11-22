@@ -4,7 +4,9 @@ import { Place } from '@/components/Place'
 import { StatusBadge } from '@/components/calendar/StatusBadge'
 import { LayCourses } from '@/components/home/LayCourses'
 import { Icon } from '@/components/ui/Icon'
+import { Photo } from '@/components/ui/Photo'
 import { SeatMeter } from '@/components/ui/SeatMeter'
+import { eventCover } from '@/lib/data/images'
 import { calendarStatus } from '@/lib/events/calendar-status'
 import { dayKeyOf, groupByDay, monthMidpoint } from '@/lib/events/month'
 import type { PublicEvent } from '@/lib/events/types'
@@ -22,7 +24,8 @@ type Props = {
 /**
  * The calendar below md (dev-1 D1-10): the month's events grouped by Riyadh day, in the homepage
  * timetable's language (a huge day figure, the title and department, time, place, a seat meter
- * and the status badges). LayCourses lays the days in and fills the meters.
+ * and the status badges), each row with a small thumbnail of the event cover (revision 04 §5).
+ * LayCourses lays the days in and fills the meters.
  */
 export function EventList({ month, events, seatsLeft, now }: Props) {
   const today = dayKeyOf(now)
@@ -71,32 +74,36 @@ function ListRow({ event, left, now }: { event: PublicEvent; left: number | null
   return (
     <li data-event={event.id} data-status={status} className="tt-row relative border-b border-line py-4 first:pt-0 last:border-b-0 last:pb-0">
       <span aria-hidden="true" className="tt-fill pointer-events-none absolute -inset-x-3 inset-y-0 bg-teal" />
-      <div className="relative flex flex-col gap-1.5">
-        {event.departmentCode && <p className="tt-dept text-label text-accent-strong">{t(`dept.${event.departmentCode}.title` as StringKey)}</p>}
-        <h4 className={cn('text-[1.125rem] leading-[1.5] font-bold', status === 'cancelled' && 'line-through decoration-2')}>
-          <Link href={`/events/${event.id}`} className={cn('tt-ink no-underline after:absolute after:inset-0 after:z-10', quiet ? 'text-muted' : 'text-deep')}>
-            {event.title}
-            <span className="sr-only">{t('a11y.when', { when: formatRiyadh(event.startsAt, 'datetime') })}</span>
-          </Link>
-        </h4>
-        <p className="tt-soft text-small text-muted">{formatRiyadhTimeRange(event.startsAt, event.endsAt)}</p>
-        <p className="tt-soft flex items-start gap-1.5 text-small text-muted">
-          <Icon icon={online ? Video : MapPin} size={16} className="mt-1" />
-          <span>{online ? t('event.format.online') : event.location ? <Place text={event.location} /> : t('event.format.inPerson')}</span>
-        </p>
-        {(meter || status !== 'open') && (
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-2">
-            {meter && <SeatMeter capacity={event.capacity as number} taken={(event.capacity as number) - (left as number)} className="tt-meter" />}
-            {/* a full meter already reads «اكتملت المقاعد» */}
-            {!(meter && status === 'full') && <StatusBadge status={status} />}
-            {status === 'ended' && event.recordingUrl && (
-              <span className="tt-ink inline-flex items-center gap-1.5 text-label text-teal">
-                <Icon icon={Video} size={16} />
-                {t('calendar.recording')}
-              </span>
-            )}
-          </div>
-        )}
+      {/* positioned, so the title link's ::after covers the thumbnail too */}
+      <div className="relative grid grid-cols-[minmax(0,1fr)_4.5rem] items-start gap-x-3">
+        <div className="flex min-w-0 flex-col gap-1.5">
+          {event.departmentCode && <p className="tt-dept text-label text-accent-strong">{t(`dept.${event.departmentCode}.title` as StringKey)}</p>}
+          <h4 className={cn('text-[1.125rem] leading-[1.5] font-bold', status === 'cancelled' && 'line-through decoration-2')}>
+            <Link href={`/events/${event.id}`} className={cn('tt-ink no-underline after:absolute after:inset-0 after:z-10', quiet ? 'text-muted' : 'text-deep')}>
+              {event.title}
+              <span className="sr-only">{t('a11y.when', { when: formatRiyadh(event.startsAt, 'datetime') })}</span>
+            </Link>
+          </h4>
+          <p className="tt-soft text-small text-muted">{formatRiyadhTimeRange(event.startsAt, event.endsAt)}</p>
+          <p className="tt-soft flex items-start gap-1.5 text-small text-muted">
+            <Icon icon={online ? Video : MapPin} size={16} className="mt-1" />
+            <span>{online ? t('event.format.online') : event.location ? <Place text={event.location} /> : t('event.format.inPerson')}</span>
+          </p>
+          {(meter || status !== 'open') && (
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+              {meter && <SeatMeter capacity={event.capacity as number} taken={(event.capacity as number) - (left as number)} className="tt-meter" />}
+              {/* a full meter already reads «اكتملت المقاعد» */}
+              {!(meter && status === 'full') && <StatusBadge status={status} />}
+              {status === 'ended' && event.recordingUrl && (
+                <span className="tt-ink inline-flex items-center gap-1.5 text-label text-teal">
+                  <Icon icon={Video} size={16} />
+                  {t('calendar.recording')}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+        <Photo image={eventCover(event)} alt="" ratio="1/1" sizes="72px" reveal={false} className={cn(quiet && 'opacity-55')} />
       </div>
     </li>
   )

@@ -63,11 +63,6 @@ export function monthMidpoint(month: string): string {
   return `${month}-15T12:00:00.000Z`
 }
 
-/** dev-1 D1-10: the "next event" banner shows when no event of the month starts after now */
-export function showNextBanner(events: { startsAt: string }[], now: number): boolean {
-  return !events.some((e) => Date.parse(e.startsAt) > now)
-}
-
 /** events by their Riyadh day ('YYYY-MM-DD'), in the order given (eventsInMonth sorts by start) */
 export function groupByDay<T extends { startsAt: string }>(events: T[]): Map<string, T[]> {
   const days = new Map<string, T[]>()

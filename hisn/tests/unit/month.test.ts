@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildMonthGrid, monthRangeUtc, nextMonth, parseMonthParam, prevMonth, showNextBanner, weekdayNames } from '@/lib/events/month'
+import { buildMonthGrid, monthRangeUtc, nextMonth, parseMonthParam, prevMonth, weekdayNames } from '@/lib/events/month'
 
 // dev-1 D1-10, month.test.ts: exactly the spec's cases, then the calendar's own helpers
 describe('monthRangeUtc', () => {
@@ -49,16 +49,5 @@ describe('weekdayNames', () => {
     expect(names[0]).toBe(new Intl.DateTimeFormat('ar', { weekday: 'long', timeZone: 'UTC' }).format(new Date('2026-11-01T12:00:00Z')))
     expect(names[0]).toContain('الأحد')
     expect(names[6]).toContain('السبت')
-  })
-})
-
-describe('showNextBanner', () => {
-  const now = Date.parse('2026-11-15T09:00:00Z')
-  it('is true when no event of the month starts after now (or the month is empty)', () => {
-    expect(showNextBanner([], now)).toBe(true)
-    expect(showNextBanner([{ startsAt: '2026-11-10T15:00:00Z' }], now)).toBe(true)
-  })
-  it('is false once one event is still ahead', () => {
-    expect(showNextBanner([{ startsAt: '2026-11-10T15:00:00Z' }, { startsAt: '2026-11-20T15:00:00Z' }], now)).toBe(false)
   })
 })

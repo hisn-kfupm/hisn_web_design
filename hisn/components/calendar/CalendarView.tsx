@@ -2,20 +2,20 @@ import { EventList } from '@/components/EventList'
 import { MonthGrid } from '@/components/MonthGrid'
 import type { PublicEvent } from '@/lib/events/types'
 import { EmptyMonth } from './EmptyMonth'
-import { NextEventBanner } from './NextEventBanner'
+import { NEXT_EVENT_SIZES, NextEventBanner } from './NextEventBanner'
 
 type Props = {
   month: string
   events: PublicEvent[]
   seatsLeft: Map<number, number | null>
   now: number
-  /** the next upcoming event when none of this month's is still ahead (loadCalendar) */
+  /** the next upcoming event, featured at the top (loadCalendar) */
   next: PublicEvent | null
 }
 
 /**
- * The calendar's light band: the month grid (md and up) and the day list (below md), or the empty
- * month's short wall; and the next-event banner when the month has nothing left ahead.
+ * The calendar's light band: the featured next event at the top (revision 04 §5), then the month
+ * grid (md and up) and the day list (below md), or the empty month's short wall beside it.
  */
 export function CalendarView({ month, events, seatsLeft, now, next }: Props) {
   return (
@@ -24,13 +24,18 @@ export function CalendarView({ month, events, seatsLeft, now, next }: Props) {
         {events.length === 0 ? (
           <div className="grid gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-end lg:gap-14">
             <EmptyMonth />
-            {next && <NextEventBanner event={next} />}
+            {next && (
+              // first on phones so the next event is at the top; beside the wall from lg
+              <div className="order-first lg:order-none">
+                <NextEventBanner event={next} month={month} sizes={NEXT_EVENT_SIZES.column} />
+              </div>
+            )}
           </div>
         ) : (
           <>
             {next && (
-              <div className="mb-12 lg:mb-16 lg:ms-auto lg:max-w-[46rem]">
-                <NextEventBanner event={next} />
+              <div className="mb-12 lg:mb-16">
+                <NextEventBanner event={next} month={month} />
               </div>
             )}
             <MonthGrid month={month} events={events} seatsLeft={seatsLeft} now={now} />

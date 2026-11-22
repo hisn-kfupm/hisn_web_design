@@ -54,6 +54,12 @@ export function Footer() {
                   <span className="draw-line pb-0.5">{t('footer.privacy')}</span>
                 </Link>
               </li>
+              {/* the stand-in photos' licences ask for the credit to stay with the site */}
+              <li>
+                <Link href="/credits" className={link}>
+                  <span className="draw-line pb-0.5">{t('footer.credits')}</span>
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>

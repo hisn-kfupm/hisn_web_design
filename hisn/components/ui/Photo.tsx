@@ -32,6 +32,13 @@ type Props = {
   glint?: boolean
   /** the square-grid reveal on entry (default on) */
   reveal?: boolean
+  /**
+   * the teal multiply grade (default on; the brief's brand grade, 04 §2). Turn it off for a photo
+   * that spans the page or a band from edge to edge, such as the event page's backdrop: the brief
+   * bars blend modes on large areas (04 §3), and a backdrop is already toned by the scrim over it.
+   * Card-sized photos and half-band photos (TalentBand, PageHead's side photo) keep it.
+   */
+  grade?: boolean
   /** object-position for the crop, e.g. "50% 30%" */
   focus?: string
   className?: string
@@ -44,7 +51,7 @@ type Props = {
  * Local files go through the image optimiser; a remote event image (admins paste any host) is
  * shown as is. No hooks here, so server and client components can both render it.
  */
-export function Photo({ image, alt, ratio, sizes, priority = false, tone = 'light', glint = false, reveal = true, focus, className }: Props) {
+export function Photo({ image, alt, ratio, sizes, priority = false, tone = 'light', glint = false, reveal = true, grade = true, focus, className }: Props) {
   const remote = !image.src.startsWith('/')
   const [cols, rows] = GRID[ratio]
   const blur: { placeholder: 'blur' | 'empty' } = { placeholder: image.blurDataURL ? 'blur' : 'empty' }
@@ -64,7 +71,7 @@ export function Photo({ image, alt, ratio, sizes, priority = false, tone = 'ligh
         className="photo-img object-cover"
         style={focus ? { objectPosition: focus } : undefined}
       />
-      <span aria-hidden="true" className="photo-grade" />
+      {grade && <span aria-hidden="true" className="photo-grade" />}
       {glint && <span aria-hidden="true" className="photo-glint" />}
       {reveal && <PhotoReveal cols={cols} rows={rows} />}
     </span>

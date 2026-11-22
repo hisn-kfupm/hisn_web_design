@@ -2,7 +2,7 @@
 
 **These are stand-ins.** They hold the place of Hisn's own photography until the team has photos of its events, members and the KFUPM campus; replace them then (keep the file names, or update `lib/data/images.ts`).
 
-All of them come from Wikimedia Commons under a licence that allows use on a website: public domain (works of US government agencies such as NASA), CC BY or CC BY-SA. The files were resized to at most 1800 px wide and recompressed as JPEG; on the site they are shown under a deep-teal colour grade done in CSS, and the files themselves are not otherwise altered. CC BY and CC BY-SA require this credit to stay with the site (link this file from the footer or an about page while the photos are in use).
+All of them come from Wikimedia Commons under a licence that allows use on a website: public domain (works of US government agencies such as NASA), CC BY or CC BY-SA. The files were resized to at most 1800 px wide and recompressed as JPEG; on the site they are cropped to fixed ratios and shown under a deep-teal colour grade (or, behind the event page head, a dark scrim) done in CSS, and the files themselves are not otherwise altered. `/credits` says so too. CC BY and CC BY-SA require this credit to stay with the site: the footer links to `/credits`, which reads the table below (`lib/data/credits.ts`), so keep a row here for every photo the site shows (a unit test checks it). Remove the page and the link once every photo is Hisn's own.
 
 | File | Author | Source | Licence |
 |---|---|---|---|
